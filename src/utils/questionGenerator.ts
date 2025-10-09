@@ -122,8 +122,8 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
   // Q6: Show reference shape + target shape with multiple drawOne() calls
   // Student needs to identify the code sequence to transform from reference to target
   // Generate a sequence that will be applied multiple times with drawOne() pattern
-  const numInstances = Math.min(tier + 1, 4); // 2-4 instances based on tier
-  const sequence = generateRepeatedDrawSequence(rng, config, tier, numInstances);
+  const actualInstances = tier <= 2 ? 2 : tier === 3 ? 3 : 4;
+  const sequence = generateRepeatedDrawSequence(rng, config, tier, actualInstances);
 
   // Options are different code sequences
   const options = [sequence];
@@ -156,7 +156,7 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
     type: "stack_reasoning",
     tier,
     family: "repeated-draw-pattern",
-    variant: { shape, frame, sequence, numInstances },
+    variant: { shape, frame, sequence, numInstances: actualInstances },
     options: shuffledOptions,
     correctIndex,
   };
@@ -165,13 +165,13 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
 function generateTransformSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
   const sequence: Transform[] = [];
   const numTransforms = config.transforms;
-  const use2D = rng.next() < 0.3; // 30% chance of 2D transformations
+  const use2D = tier <= 1 ? rng.next() < 0.7 : rng.next() < 0.3; // Higher tiers use 3D more often
 
   for (let i = 0; i < numTransforms; i++) {
     if (tier === 1) {
-      // Tier 1: Single rotation or translation
+      // Tier 1: Simple single axis operations
       if (rng.next() < 0.5) {
-        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const); // z-axis for 2D
+        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
@@ -181,9 +181,9 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
         const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
         sequence.push({ type: "translate", params });
       }
-    } else {
-      // Higher tiers: Mix of transforms
-      const transformType = rng.next() < 0.6 ? "rotate" : "translate";
+    } else if (tier === 2) {
+      // Tier 2: Mix of operations with variety
+      const transformType = rng.next() < 0.5 ? "rotate" : "translate";
       if (transformType === "rotate") {
         const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
@@ -194,6 +194,52 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
         const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
         const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
         sequence.push({ type: "translate", params });
+      }
+    } else {
+      // Tier 3-4: Complex sequences with alternating transforms and varied axes
+      // Force alternating pattern for complexity
+      const shouldRotate = i % 2 === 0 ? rng.next() < 0.6 : rng.next() < 0.4;
+      
+      if (shouldRotate) {
+        // Use all three axes more frequently
+        const axis: number = rng.choice([0, 1, 2] as const);
+        const angle: number = rng.choice(config.angles);
+        const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
+        sequence.push({ type: "rotate", params });
+      } else {
+        // Use all three axes more frequently
+        const axis: number = rng.choice([0, 1, 2] as const);
+        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
+        const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+        sequence.push({ type: "translate", params });
+      }
+    }
+  }
+
+  // For tier 4, ensure we have a good mix of both types
+  if (tier === 4) {
+    const rotateCount = sequence.filter(t => t.type === "rotate").length;
+    const translateCount = sequence.filter(t => t.type === "translate").length;
+    
+    // If too imbalanced, adjust the last transform
+    if (rotateCount === 0 || translateCount === 0) {
+      const lastIdx = sequence.length - 1;
+      const needsRotate = rotateCount === 0;
+      
+      if (needsRotate) {
+        const axis: number = rng.choice([0, 1, 2] as const);
+        const angle: number = rng.choice(config.angles);
+        sequence[lastIdx] = {
+          type: "rotate",
+          params: axis === 0 ? [angle, 1, 0, 0] : axis === 1 ? [angle, 0, 1, 0] : [angle, 0, 0, 1]
+        };
+      } else {
+        const axis: number = rng.choice([0, 1, 2] as const);
+        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
+        sequence[lastIdx] = {
+          type: "translate",
+          params: axis === 0 ? [dist, 0, 0] : axis === 1 ? [0, dist, 0] : [0, 0, dist]
+        };
       }
     }
   }
@@ -206,22 +252,33 @@ function generateRepeatedDrawSequence(rng: SeededRandom, config: any, tier: numb
   // This creates a pattern where each shape is transformed from the previous one
   const sequence: Transform[] = [];
   
+  // Number of instances increases with tier
+  const actualInstances = tier <= 2 ? 2 : tier === 3 ? 3 : 4;
+  
   // For each instance after the first, add transformations
-  for (let i = 0; i < numInstances; i++) {
+  for (let i = 0; i < actualInstances; i++) {
     // Add drawOne call marker (we'll handle this in rendering)
     if (i > 0) {
       // Translation to position next instance
-      const axis: number = rng.choice([0, 1, 2] as const);
+      const axis: number = tier >= 3 ? rng.choice([0, 1, 2] as const) : rng.choice([0, 2] as const);
       const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
       const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
       sequence.push({ type: "translate", params });
       
-      // Rotation for next instance
+      // Rotation for next instance (more complex for higher tiers)
       if (tier >= 2) {
-        const rotAxis: number = rng.choice([0, 1, 2] as const);
+        const rotAxis: number = tier >= 3 ? rng.choice([0, 1, 2] as const) : rng.choice([2] as const);
         const angle: number = rng.choice(config.angles);
         const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params: rotParams });
+      }
+      
+      // Add extra transform for tier 4 to make it more complex
+      if (tier === 4 && i < actualInstances - 1) {
+        const axis: number = rng.choice([0, 1, 2] as const);
+        const dist: number = axis === 1 ? rng.choice(config.yDistances.map(d => d * 0.5)) : rng.choice(config.distances.map(d => d * 0.5));
+        const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+        sequence.push({ type: "translate", params });
       }
     }
   }
