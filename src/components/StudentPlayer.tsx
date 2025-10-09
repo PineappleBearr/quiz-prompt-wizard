@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ThreeScene } from "./ThreeScene";
 import { Question, Transform } from "@/types/question";
 import { toast } from "sonner";
+import { Maximize2 } from "lucide-react";
 
 interface StudentPlayerProps {
   question: Question;
@@ -23,6 +25,13 @@ export const StudentPlayer = ({
   onSubmit 
 }: StudentPlayerProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [enlargedViz, setEnlargedViz] = useState<{
+    transforms: Transform[];
+    shape: string;
+    showInitialState?: boolean;
+    showMultipleInstances?: boolean;
+    numInstances?: number;
+  } | null>(null);
 
   // Reset selected answer when question changes
   useEffect(() => {
@@ -76,7 +85,7 @@ export const StudentPlayer = ({
               <p className="text-sm text-muted-foreground mb-4">
                 <strong>Note:</strong> Distances are in units, angles are in degrees.
               </p>
-              <div className="border rounded-lg p-4 bg-muted/20 inline-block">
+              <div className="border rounded-lg p-4 bg-muted/20 inline-block relative group">
                 <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
                 <ThreeScene 
                   key={`${question.questionId}-initial`} 
@@ -85,6 +94,14 @@ export const StudentPlayer = ({
                   width={320} 
                   height={240} 
                 />
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           )}
@@ -109,7 +126,7 @@ export const StudentPlayer = ({
                     </div>
                   ))}
                 </div>
-                <div className="border rounded-lg p-4 bg-muted/20">
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
                   <ThreeScene 
                     key={`${question.questionId}-q5-initial`} 
@@ -118,6 +135,14 @@ export const StudentPlayer = ({
                     width={320} 
                     height={240} 
                   />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -134,7 +159,7 @@ export const StudentPlayer = ({
                 <strong>Note:</strong> Distances are in units, angles are in degrees.
               </p>
               <div className="grid grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4 bg-muted/20">
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Reference (drawOne):</p>
                   <ThreeScene 
                     key={`${question.questionId}-reference`}
@@ -143,8 +168,16 @@ export const StudentPlayer = ({
                     width={320}
                     height={240}
                   />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="border rounded-lg p-4 bg-muted/20">
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Target Pattern:</p>
                   <ThreeScene 
                     key={`${question.questionId}-target`}
@@ -155,6 +188,19 @@ export const StudentPlayer = ({
                     showMultipleInstances={true}
                     numInstances={question.variant.numInstances || 3}
                   />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ 
+                      transforms: question.variant.sequence, 
+                      shape: question.variant.shape,
+                      showMultipleInstances: true,
+                      numInstances: question.variant.numInstances || 3
+                    })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -181,7 +227,7 @@ export const StudentPlayer = ({
                   {question.type === "transform_mcq" && (
                     <div className="space-y-3">
                       <div className="font-bold text-lg">{optionLabel}.</div>
-                      <div className="border rounded bg-muted/10 p-3">
+                      <div className="border rounded bg-muted/10 p-3 relative group">
                         <ThreeScene 
                           key={`${question.questionId}-option-${idx}`}
                           shape={question.variant.shape} 
@@ -190,6 +236,17 @@ export const StudentPlayer = ({
                           height={200}
                           showInitialState={true}
                         />
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEnlargedViz({ transforms: option, shape: question.variant.shape, showInitialState: true });
+                          }}
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </Button>
                       </div>
                       <div className="bg-codeBg p-3 rounded font-mono text-sm space-y-1">
                         {option.map((transform, tidx) => (
@@ -226,7 +283,7 @@ export const StudentPlayer = ({
                   {question.type === "code_picture" && (
                     <div className="flex items-start gap-4">
                       <div className="font-bold text-lg pt-2">{optionLabel}.</div>
-                      <div className="flex-1 border rounded bg-muted/10 p-2">
+                      <div className="flex-1 border rounded bg-muted/10 p-2 relative group">
                         <ThreeScene 
                           key={`${question.questionId}-option-${idx}`}
                           shape={question.variant.shape} 
@@ -235,6 +292,17 @@ export const StudentPlayer = ({
                           height={200}
                           showInitialState={true}
                         />
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEnlargedViz({ transforms: option, shape: question.variant.shape, showInitialState: true });
+                          }}
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -273,6 +341,24 @@ export const StudentPlayer = ({
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={!!enlargedViz} onOpenChange={() => setEnlargedViz(null)}>
+        <DialogContent className="max-w-4xl">
+          {enlargedViz && (
+            <div className="flex items-center justify-center p-4">
+              <ThreeScene
+                transforms={enlargedViz.transforms}
+                shape={enlargedViz.shape}
+                width={800}
+                height={600}
+                showInitialState={enlargedViz.showInitialState}
+                showMultipleInstances={enlargedViz.showMultipleInstances}
+                numInstances={enlargedViz.numInstances}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
