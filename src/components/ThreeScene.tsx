@@ -199,7 +199,17 @@ export const ThreeScene = ({
     if (showMultipleInstances) {
       const colors = [0xff3333, 0x3333ff, 0x33ff33, 0xff9933, 0xff33ff]; // Different colors for each instance
       
-      for (let i = 0; i < numInstances; i++) {
+      // First instance - no transforms (at origin)
+      const firstGeometry = createShapeGeometry();
+      const firstMaterial = new THREE.MeshPhongMaterial({ 
+        color: colors[0],
+        side: THREE.DoubleSide 
+      });
+      const firstMesh = new THREE.Mesh(firstGeometry, firstMaterial);
+      scene.add(firstMesh);
+      
+      // Subsequent instances with cumulative transforms
+      for (let i = 1; i < numInstances; i++) {
         const instanceGeometry = createShapeGeometry();
         const instanceMaterial = new THREE.MeshPhongMaterial({ 
           color: colors[i % colors.length],
@@ -207,30 +217,27 @@ export const ThreeScene = ({
         });
         const instanceMesh = new THREE.Mesh(instanceGeometry, instanceMaterial);
         
-        // Apply cumulative transforms up to this instance
-        let cumulativeTranslation = new THREE.Vector3(0, 0, 0);
-        let cumulativeRotation = new THREE.Euler(0, 0, 0);
-        
-        for (let j = 0; j < transforms.length && j <= i * 2; j++) {
-          const transform = transforms[j];
-          if (transform.type === "translate") {
-            cumulativeTranslation.x += transform.params[0] || 0;
-            cumulativeTranslation.y += transform.params[1] || 0;
-            cumulativeTranslation.z += transform.params[2] || 0;
-          } else if (transform.type === "rotate") {
-            const angle = (transform.params[0] || 0) * Math.PI / 180;
-            const axisX = transform.params[1] || 0;
-            const axisY = transform.params[2] || 0;
-            const axisZ = transform.params[3] || 0;
-            
-            if (axisX !== 0) cumulativeRotation.x += angle * axisX;
-            if (axisY !== 0) cumulativeRotation.y += angle * axisY;
-            if (axisZ !== 0) cumulativeRotation.z += angle * axisZ;
+        // Apply all transforms cumulatively up to this instance
+        transforms.forEach((transform, tIndex) => {
+          // Each instance gets all previous transforms applied
+          if (tIndex < i * 2) {  // Each instance has 2 transforms (translate + rotate)
+            if (transform.type === "translate") {
+              instanceMesh.position.x += transform.params[0] || 0;
+              instanceMesh.position.y += transform.params[1] || 0;
+              instanceMesh.position.z += transform.params[2] || 0;
+            } else if (transform.type === "rotate") {
+              const angle = (transform.params[0] || 0) * Math.PI / 180;
+              const axisX = transform.params[1] || 0;
+              const axisY = transform.params[2] || 0;
+              const axisZ = transform.params[3] || 0;
+              
+              if (axisX !== 0) instanceMesh.rotation.x += angle * axisX;
+              if (axisY !== 0) instanceMesh.rotation.y += angle * axisY;
+              if (axisZ !== 0) instanceMesh.rotation.z += angle * axisZ;
+            }
           }
-        }
+        });
         
-        instanceMesh.position.copy(cumulativeTranslation);
-        instanceMesh.rotation.copy(cumulativeRotation);
         scene.add(instanceMesh);
       }
     } else {
