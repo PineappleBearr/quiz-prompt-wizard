@@ -8,6 +8,7 @@ import { generateSeed } from "@/utils/rng";
 import { generateQuestion } from "@/utils/questionGenerator";
 import { Question } from "@/types/question";
 import { toast } from "sonner";
+import { emitQuestionGenerated } from "@/pages/Index";
 
 export const StaffConsole = () => {
   const [examKey, setExamKey] = useState("S2025|E3|slot1");
@@ -31,6 +32,7 @@ export const StaffConsole = () => {
       }
       
       setGeneratedQuestions(questions);
+      emitQuestionGenerated(questions);
       toast.success(`Generated ${numQuestions} question(s)`);
     } catch (error) {
       toast.error("Failed to generate questions");
@@ -96,8 +98,8 @@ export const StaffConsole = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="transform_mcq">Q4-like (Transform MCQ)</SelectItem>
-                  <SelectItem value="code_picture" disabled>Q5-like (Code→Picture)</SelectItem>
-                  <SelectItem value="stack_reasoning" disabled>Q6-like (Stack Reasoning)</SelectItem>
+                  <SelectItem value="code_picture">Q5-like (Code→Picture)</SelectItem>
+                  <SelectItem value="stack_reasoning">Q6-like (Stack Reasoning)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

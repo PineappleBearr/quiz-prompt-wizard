@@ -86,19 +86,22 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
     });
     const mesh = new THREE.Mesh(geometry, material);
 
-    // Apply transforms
+    // Apply transforms (OpenGL format: glRotatef(angle, x, y, z))
     transforms.forEach(transform => {
       if (transform.type === "translate") {
         mesh.position.x += transform.params[0] || 0;
         mesh.position.y += transform.params[1] || 0;
         mesh.position.z += transform.params[2] || 0;
       } else if (transform.type === "rotate") {
-        const angleX = (transform.params[0] || 0) * Math.PI / 180;
-        const angleY = (transform.params[1] || 0) * Math.PI / 180;
-        const angleZ = (transform.params[2] || 0) * Math.PI / 180;
-        mesh.rotation.x += angleX;
-        mesh.rotation.y += angleY;
-        mesh.rotation.z += angleZ;
+        const angle = (transform.params[0] || 0) * Math.PI / 180;
+        const axisX = transform.params[1] || 0;
+        const axisY = transform.params[2] || 0;
+        const axisZ = transform.params[3] || 0;
+        
+        // Rotate around the specified axis
+        if (axisX !== 0) mesh.rotation.x += angle * axisX;
+        if (axisY !== 0) mesh.rotation.y += angle * axisY;
+        if (axisZ !== 0) mesh.rotation.z += angle * axisZ;
       }
     });
 

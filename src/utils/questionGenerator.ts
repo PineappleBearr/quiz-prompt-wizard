@@ -4,9 +4,9 @@ import { SeededRandom } from "./rng";
 // Difficulty tiers based on specification
 const TIER_CONFIGS = {
   1: { transforms: 1, angles: [90, -90, 180], distances: [1.0, 2.0] },
-  2: { transforms: 2, angles: [90, -90, 180], distances: [1.0, 2.0] },
-  3: { transforms: 3, angles: [90, -90, 180], distances: [1.0, 2.0] },
-  4: { transforms: 4, angles: [90, -90, 180], distances: [1.0, 2.0] },
+  2: { transforms: 2, angles: [90, -90, 180, 45, -45], distances: [1.0, 2.0, 1.5] },
+  3: { transforms: 3, angles: [90, -90, 180, 45, -45, 135, -135], distances: [1.0, 2.0, 1.5, 0.5] },
+  4: { transforms: 4, angles: [90, -90, 180, 45, -45, 135, -135, 270, 30, 60], distances: [1.0, 2.0, 1.5, 0.5, 2.5] },
 };
 
 const SHAPES = ["digit1", "letterL", "poly5"];

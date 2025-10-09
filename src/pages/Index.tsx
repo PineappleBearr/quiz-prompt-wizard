@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StaffConsole } from "@/components/StaffConsole";
 import { StudentPlayer } from "@/components/StudentPlayer";
@@ -6,8 +6,28 @@ import { generateQuestion } from "@/utils/questionGenerator";
 import { Question } from "@/types/question";
 import { Button } from "@/components/ui/button";
 
+// Global event emitter for question updates
+const questionEventTarget = new EventTarget();
+export const emitQuestionGenerated = (questions: Question[]) => {
+  questionEventTarget.dispatchEvent(new CustomEvent('questionsGenerated', { detail: questions }));
+};
+
 const Index = () => {
   const [demoQuestion, setDemoQuestion] = useState<Question | null>(null);
+
+  useEffect(() => {
+    const handleQuestionsGenerated = (event: Event) => {
+      const questions = (event as CustomEvent).detail as Question[];
+      if (questions.length > 0) {
+        setDemoQuestion(questions[0]);
+      }
+    };
+
+    questionEventTarget.addEventListener('questionsGenerated', handleQuestionsGenerated);
+    return () => {
+      questionEventTarget.removeEventListener('questionsGenerated', handleQuestionsGenerated);
+    };
+  }, []);
 
   const loadDemoQuestion = () => {
     const question = generateQuestion("demo123456789abc", "transform_mcq", 2);
