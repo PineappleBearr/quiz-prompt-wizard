@@ -114,27 +114,111 @@ export const ThreeScene = ({
     // Origin marker
     scene.add(createUnitLabel('0', new THREE.Vector3(-0.3, -0.3, 0), 0x666666));
     
+    // Add angle reference markers (protractor-like circles around each axis)
+    const createAngleReferenceCircle = (axis: 'x' | 'y' | 'z', radius: number = 1.5, color: number = 0xcccccc) => {
+      const segments = 24; // 24 segments = 15° each
+      const majorTickInterval = 2; // Every 30° (every 2 segments)
+      const points: THREE.Vector3[] = [];
+      
+      for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        let x = 0, y = 0, z = 0;
+        
+        if (axis === 'x') {
+          y = Math.cos(angle) * radius;
+          z = Math.sin(angle) * radius;
+        } else if (axis === 'y') {
+          x = Math.cos(angle) * radius;
+          z = Math.sin(angle) * radius;
+        } else {
+          x = Math.cos(angle) * radius;
+          y = Math.sin(angle) * radius;
+        }
+        
+        points.push(new THREE.Vector3(x, y, z));
+      }
+      
+      // Create the reference circle
+      const circleGeometry = new THREE.BufferGeometry().setFromPoints(points);
+      const circleMaterial = new THREE.LineBasicMaterial({ 
+        color: color, 
+        transparent: true, 
+        opacity: 0.3,
+        linewidth: 1
+      });
+      const circle = new THREE.Line(circleGeometry, circleMaterial);
+      
+      // Add tick marks at major intervals
+      const tickMarks = new THREE.Group();
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        const isMajorTick = i % majorTickInterval === 0;
+        const tickLength = isMajorTick ? 0.15 : 0.08;
+        const innerRadius = radius - tickLength;
+        
+        let x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0;
+        
+        if (axis === 'x') {
+          y1 = Math.cos(angle) * innerRadius;
+          z1 = Math.sin(angle) * innerRadius;
+          y2 = Math.cos(angle) * radius;
+          z2 = Math.sin(angle) * radius;
+        } else if (axis === 'y') {
+          x1 = Math.cos(angle) * innerRadius;
+          z1 = Math.sin(angle) * innerRadius;
+          x2 = Math.cos(angle) * radius;
+          z2 = Math.sin(angle) * radius;
+        } else {
+          x1 = Math.cos(angle) * innerRadius;
+          y1 = Math.sin(angle) * innerRadius;
+          x2 = Math.cos(angle) * radius;
+          y2 = Math.sin(angle) * radius;
+        }
+        
+        const tickPoints = [new THREE.Vector3(x1, y1, z1), new THREE.Vector3(x2, y2, z2)];
+        const tickGeometry = new THREE.BufferGeometry().setFromPoints(tickPoints);
+        const tickMaterial = new THREE.LineBasicMaterial({ 
+          color: color, 
+          transparent: true, 
+          opacity: isMajorTick ? 0.5 : 0.3,
+          linewidth: isMajorTick ? 2 : 1
+        });
+        const tick = new THREE.Line(tickGeometry, tickMaterial);
+        tickMarks.add(tick);
+      }
+      
+      const group = new THREE.Group();
+      group.add(circle);
+      group.add(tickMarks);
+      return group;
+    };
+    
+    // Add angle reference circles around each axis
+    scene.add(createAngleReferenceCircle('x', 1.5, 0xff9999)); // Red tint for X-axis
+    scene.add(createAngleReferenceCircle('y', 1.5, 0x99ff99)); // Green tint for Y-axis
+    scene.add(createAngleReferenceCircle('z', 1.5, 0x9999ff)); // Blue tint for Z-axis
+    
     // Add angle reference note
     const createRotationLabel = (text: string, position: THREE.Vector3) => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d')!;
-      canvas.width = 256;
+      canvas.width = 320;
       canvas.height = 64;
       context.fillStyle = '#888888';
-      context.font = '20px Arial';
+      context.font = '18px Arial';
       context.textAlign = 'center';
       context.textBaseline = 'middle';
-      context.fillText(text, 128, 32);
+      context.fillText(text, 160, 32);
       
       const texture = new THREE.CanvasTexture(canvas);
       const material = new THREE.SpriteMaterial({ map: texture });
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
-      sprite.scale.set(1.5, 0.35, 1);
+      sprite.scale.set(1.8, 0.35, 1);
       return sprite;
     };
     
-    scene.add(createRotationLabel('Rotation: degrees (°)', new THREE.Vector3(0, -2.8, 0)));
+    scene.add(createRotationLabel('Angle markers: each tick = 15°', new THREE.Vector3(0, -2.8, 0)));
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
