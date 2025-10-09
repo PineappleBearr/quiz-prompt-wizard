@@ -27,7 +27,7 @@ export const StaffConsole = () => {
       
       for (let i = 0; i < numQuestions; i++) {
         const seed = await generateSeed(examKey, studentId, i, questionType, parseInt(tier));
-        const question = generateQuestion(seed, questionType, parseInt(tier));
+        const question = generateQuestion(seed, questionType, parseInt(tier), i);
         questions.push(question);
       }
       

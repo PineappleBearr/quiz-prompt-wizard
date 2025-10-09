@@ -12,22 +12,25 @@ const TIER_CONFIGS = {
 const SHAPES = ["digit1", "letterL", "poly5"];
 const FRAMES = ["world", "local"];
 
-export function generateQuestion(seed: string, type: string, tier: number): Question {
+export function generateQuestion(seed: string, type: string, tier: number, questionIndex: number = 0): Question {
   const rng = new SeededRandom(seed);
   const config = TIER_CONFIGS[tier as keyof typeof TIER_CONFIGS] || TIER_CONFIGS[1];
 
+  // Vary shape based on question index to ensure different shapes across questions
+  const shapeIndex = questionIndex % SHAPES.length;
+  const shape = SHAPES[shapeIndex];
+
   // Generate variant based on question type
   if (type === "code_picture") {
-    return generateQ5Question(seed, rng, config, tier);
+    return generateQ5Question(seed, rng, config, tier, shape);
   } else if (type === "stack_reasoning") {
-    return generateQ6Question(seed, rng, config, tier);
+    return generateQ6Question(seed, rng, config, tier, shape);
   } else {
-    return generateQ4Question(seed, rng, config, tier);
+    return generateQ4Question(seed, rng, config, tier, shape);
   }
 }
 
-function generateQ4Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
-  const shape = rng.choice(SHAPES);
+function generateQ4Question(seed: string, rng: SeededRandom, config: any, tier: number, shape: string): Question {
   const frame = tier >= 3 ? rng.choice(FRAMES) : "world";
   const sequence = generateTransformSequence(rng, config, tier);
 
@@ -69,13 +72,14 @@ function generateQ4Question(seed: string, rng: SeededRandom, config: any, tier: 
   };
 }
 
-function generateQ5Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
-  const shape = rng.choice(SHAPES);
+function generateQ5Question(seed: string, rng: SeededRandom, config: any, tier: number, shape: string): Question {
   const frame = "world";
   
-  // Q5 uses matrix stack with push/pop operations
-  const sequence = generateMatrixStackSequence(rng, config, tier);
+  // Q5: Show code, student picks matching image
+  // Generate the correct transform sequence
+  const sequence = generateTransformSequence(rng, config, tier);
 
+  // Options will be different transform sequences (rendered as images)
   const options = [sequence];
   const seenOptions = new Set([JSON.stringify(sequence)]);
   
@@ -105,20 +109,23 @@ function generateQ5Question(seed: string, rng: SeededRandom, config: any, tier: 
     seed,
     type: "code_picture",
     tier,
-    family: "code-to-picture-matrix-stack",
+    family: "code-to-picture",
     variant: { shape, frame, sequence },
     options: shuffledOptions,
     correctIndex,
   };
 }
 
-function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
-  const shape = rng.choice(SHAPES);
+function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: number, shape: string): Question {
   const frame = "world";
   
-  // Q6 shows code with commented/uncommented lines for debugging
-  const sequence = generateTransformSequence(rng, config, tier);
+  // Q6: Show reference shape + target shape with multiple drawOne() calls
+  // Student needs to identify the code sequence to transform from reference to target
+  // Generate a sequence that will be applied multiple times with drawOne() pattern
+  const numInstances = Math.min(tier + 1, 4); // 2-4 instances based on tier
+  const sequence = generateRepeatedDrawSequence(rng, config, tier, numInstances);
 
+  // Options are different code sequences
   const options = [sequence];
   const seenOptions = new Set([JSON.stringify(sequence)]);
   
@@ -148,8 +155,8 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
     seed,
     type: "stack_reasoning",
     tier,
-    family: "stack-reasoning-debug",
-    variant: { shape, frame, sequence },
+    family: "repeated-draw-pattern",
+    variant: { shape, frame, sequence, numInstances },
     options: shuffledOptions,
     correctIndex,
   };
@@ -194,25 +201,23 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
   return sequence;
 }
 
-function generateMatrixStackSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
-  // Q5 style: sequences with matrix push/pop operations
+function generateRepeatedDrawSequence(rng: SeededRandom, config: any, tier: number, numInstances: number): Transform[] {
+  // Q6 style: Generate a pattern that will be repeated with drawOne() calls
+  // This creates the transforms between each drawOne() call
   const sequence: Transform[] = [];
-  const numGroups = Math.min(tier, 3); // 1-3 groups depending on tier
   
-  for (let g = 0; g < numGroups; g++) {
-    // Add a translation
+  for (let i = 0; i < numInstances - 1; i++) {
+    // Translation between instances
     const axis: number = rng.choice([0, 1, 2] as const);
     const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
     const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
     sequence.push({ type: "translate", params });
     
-    // Optionally add a rotation
-    if (rng.next() < 0.7) {
-      const rotAxis: number = rng.choice([0, 1, 2] as const);
-      const angle: number = rng.choice(config.angles);
-      const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
-      sequence.push({ type: "rotate", params: rotParams });
-    }
+    // Rotation between instances
+    const rotAxis: number = rng.choice([0, 1, 2] as const);
+    const angle: number = rng.choice(config.angles);
+    const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
+    sequence.push({ type: "rotate", params: rotParams });
   }
 
   return sequence;

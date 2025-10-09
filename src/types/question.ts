@@ -7,6 +7,7 @@ export interface QuestionVariant {
   shape: string;
   frame: string;
   sequence: Transform[];
+  numInstances?: number; // For Q6: number of drawOne() calls
 }
 
 export interface Question {

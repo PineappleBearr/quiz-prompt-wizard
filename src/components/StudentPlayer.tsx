@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { ThreeScene } from "./ThreeScene";
 import { Question, Transform } from "@/types/question";
 import { toast } from "sonner";
@@ -24,16 +22,16 @@ export const StudentPlayer = ({
   onPrev, 
   onSubmit 
 }: StudentPlayerProps) => {
-  const [selectedAnswer, setSelectedAnswer] = useState<string>("");
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
   // Reset selected answer when question changes
   useEffect(() => {
-    setSelectedAnswer("");
+    setSelectedAnswer(null);
   }, [question.questionId]);
 
   const handleSubmit = () => {
-    const answerIndex = parseInt(selectedAnswer);
-    const isCorrect = answerIndex === question.correctIndex;
+    if (selectedAnswer === null) return;
+    const isCorrect = selectedAnswer === question.correctIndex;
     
     if (isCorrect) {
       toast.success("Correct! Well done!");
@@ -41,16 +39,7 @@ export const StudentPlayer = ({
       toast.error(`Incorrect. The correct answer was option ${String.fromCharCode(65 + question.correctIndex)}`);
     }
     
-    onSubmit?.(answerIndex);
-  };
-
-  const formatTransform = (t: Transform): string => {
-    if (t.type === "translate") {
-      return `glTranslatef(${t.params[0]}, ${t.params[1]}, ${t.params[2]})`;
-    } else if (t.type === "rotate") {
-      return `glRotatef(${t.params[0]}, ${t.params[1]}, ${t.params[2]}, ${t.params[3]})`;
-    }
-    return "";
+    onSubmit?.(selectedAnswer);
   };
 
   return (
@@ -74,54 +63,134 @@ export const StudentPlayer = ({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Question prompt */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="flex-1">
-                <p className="text-base leading-relaxed">
-                  <span className="inline-block w-6 h-6 rounded-full bg-primary text-primary-foreground text-center leading-6 mr-2">◉</span>
-                  {question.type === "code_picture" ? (
-                    <>What image is drawn by the following code segment?</>
-                  ) : question.type === "stack_reasoning" ? (
-                    <>Which transformation sequence produces the result shown?</>
-                  ) : (
-                    <>
-                      Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
-                      representation of the shape. Which OpenGL transformations result in the picture shown?
-                    </>
-                  )}
-                </p>
-              </div>
-              <div className="flex-shrink-0">
-                <ThreeScene key={`${question.questionId}-objective`} transforms={question.variant.sequence} shape={question.variant.shape} width={280} height={220} />
-                <p className="text-xs text-center text-muted-foreground mt-1">Target shape (transformed)</p>
+          {/* Q4: Show target shape with question */}
+          {question.type === "transform_mcq" && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-base leading-relaxed">
+                    Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
+                    representation of the shape. Which OpenGL transformations result in the picture shown on the right?
+                  </p>
+                </div>
+                <div className="flex-shrink-0 border rounded-lg p-4 bg-muted/20">
+                  <ThreeScene 
+                    key={`${question.questionId}-objective`} 
+                    transforms={question.variant.sequence} 
+                    shape={question.variant.shape} 
+                    width={280} 
+                    height={220} 
+                  />
+                  <p className="text-xs text-center text-muted-foreground mt-2">Target shape</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Q5: Show code, student picks image */}
+          {question.type === "code_picture" && (
+            <div className="space-y-4">
+              <p className="text-base leading-relaxed mb-4">
+                What image is drawn by the following code segment?
+              </p>
+              <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
+                {question.variant.sequence.map((transform, idx) => (
+                  <div key={idx}>
+                    {transform.type === "translate" 
+                      ? `glTranslatef(${transform.params.join(", ")});`
+                      : `glRotatef(${transform.params.join(", ")});`
+                    }
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Q6: Show reference + target, student picks code */}
+          {question.type === "stack_reasoning" && (
+            <div className="space-y-4">
+              <p className="text-base leading-relaxed">
+                Given is the shape below drawn by using the function <code className="bg-codeBg px-2 py-0.5 rounded">drawOne()</code>. 
+                How can we use this function to draw the target pattern on the right (with {question.variant.numInstances || 3} instances)?
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Reference (drawOne):</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-reference`}
+                    shape={question.variant.shape} 
+                    transforms={[]}
+                    width={280}
+                    height={220}
+                  />
+                </div>
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Target Pattern:</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-target`}
+                    shape={question.variant.shape} 
+                    transforms={question.variant.sequence}
+                    width={280}
+                    height={220}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Options */}
-          <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer}>
-            <div className="grid grid-cols-2 gap-6">
-              {question.options.map((option, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <RadioGroupItem value={idx.toString()} id={`option-${idx}`} />
-                    <Label htmlFor={`option-${idx}`} className="text-base font-medium cursor-pointer">
-                      Option {String.fromCharCode(65 + idx)}
-                    </Label>
-                  </div>
-                  <div className="border rounded-lg p-3 space-y-3 hover:border-primary transition-colors">
-                    <ThreeScene key={`${question.questionId}-${idx}`} transforms={option} shape={question.variant.shape} width={320} height={240} />
-                    <div className="bg-codeBg p-2 rounded text-xs font-mono space-y-0.5">
-                      {option.map((t, tidx) => (
-                        <div key={tidx}>{formatTransform(t)};</div>
-                      ))}
+          <div className="space-y-3 pt-4">
+            <p className="text-sm font-medium text-muted-foreground">Select your answer:</p>
+            {question.options.map((option, idx) => {
+              const optionLabel = String.fromCharCode(65 + idx);
+              const isSelected = selectedAnswer === idx;
+              
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedAnswer(idx)}
+                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                    isSelected 
+                      ? "border-primary bg-primary/10" 
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  {/* Q4 and Q6: Show code options */}
+                  {(question.type === "transform_mcq" || question.type === "stack_reasoning") && (
+                    <div>
+                      <div className="font-bold text-lg mb-2">{optionLabel}.</div>
+                      <div className="bg-codeBg p-3 rounded font-mono text-sm space-y-1">
+                        {option.map((transform, tidx) => (
+                          <div key={tidx}>
+                            {transform.type === "translate" 
+                              ? `glTranslatef(${transform.params.join(", ")});`
+                              : `glRotatef(${transform.params.join(", ")});`
+                            }
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </RadioGroup>
+                  )}
+                  
+                  {/* Q5: Show image options */}
+                  {question.type === "code_picture" && (
+                    <div className="flex items-start gap-4">
+                      <div className="font-bold text-lg pt-2">{optionLabel}.</div>
+                      <div className="flex-1 border rounded bg-muted/10 p-2">
+                        <ThreeScene 
+                          key={`${question.questionId}-option-${idx}`}
+                          shape={question.variant.shape} 
+                          transforms={option}
+                          width={300}
+                          height={200}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="flex gap-2">
@@ -145,7 +214,7 @@ export const StudentPlayer = ({
             </div>
             <Button 
               onClick={handleSubmit} 
-              disabled={selectedAnswer === ""}
+              disabled={selectedAnswer === null}
               size="lg"
             >
               Submit Answer
