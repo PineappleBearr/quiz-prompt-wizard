@@ -43,25 +43,47 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
     const createAxisLabel = (text: string, position: THREE.Vector3, color: number) => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d')!;
-      canvas.width = 64;
+      canvas.width = 128;
       canvas.height = 64;
       context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
-      context.font = 'Bold 48px Arial';
+      context.font = 'Bold 32px Arial';
       context.textAlign = 'center';
       context.textBaseline = 'middle';
-      context.fillText(text, 32, 32);
+      context.fillText(text, 64, 32);
       
       const texture = new THREE.CanvasTexture(canvas);
       const material = new THREE.SpriteMaterial({ map: texture });
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
-      sprite.scale.set(0.5, 0.5, 1);
+      sprite.scale.set(0.8, 0.4, 1);
       return sprite;
     };
 
-    scene.add(createAxisLabel('x', new THREE.Vector3(3.3, 0, 0), 0xff0000));
-    scene.add(createAxisLabel('y', new THREE.Vector3(0, 3.3, 0), 0x00ff00));
-    scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 3.3), 0x0000ff));
+    scene.add(createAxisLabel('x (units)', new THREE.Vector3(3.5, 0, 0), 0xff0000));
+    scene.add(createAxisLabel('y (units)', new THREE.Vector3(0, 3.5, 0), 0x00ff00));
+    scene.add(createAxisLabel('z (units)', new THREE.Vector3(0, 0, 3.5), 0x0000ff));
+    
+    // Add rotation angle indicator text
+    const createRotationLabel = (text: string, position: THREE.Vector3) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d')!;
+      canvas.width = 256;
+      canvas.height = 64;
+      context.fillStyle = '#666666';
+      context.font = '24px Arial';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(text, 128, 32);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(material);
+      sprite.position.copy(position);
+      sprite.scale.set(1.5, 0.4, 1);
+      return sprite;
+    };
+    
+    scene.add(createRotationLabel('Angles in degrees (°)', new THREE.Vector3(0, -2.5, 0)));
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
