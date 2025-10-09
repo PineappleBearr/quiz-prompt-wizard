@@ -59,7 +59,11 @@ export const StudentPlayer = ({
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-2xl">Quiz 4 - Transform MCQ</CardTitle>
+              <CardTitle className="text-2xl">
+                {question.type === "code_picture" ? "Quiz 5 - Code → Picture" : 
+                 question.type === "stack_reasoning" ? "Quiz 6 - Stack Reasoning" : 
+                 "Quiz 4 - Transform MCQ"}
+              </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Question ID: {question.questionId} | Tier {question.tier}
               </p>
@@ -76,11 +80,16 @@ export const StudentPlayer = ({
               <div className="flex-1">
                 <p className="text-base leading-relaxed">
                   <span className="inline-block w-6 h-6 rounded-full bg-primary text-primary-foreground text-center leading-6 mr-2">◉</span>
-                  Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
-                  representation of the number "1" in the xy-plane as shown in the image on the right.
-                </p>
-                <p className="text-base leading-relaxed mt-4">
-                  Which OpenGL transformations result in the pictures below?
+                  {question.type === "code_picture" ? (
+                    <>What image is drawn by the following code segment?</>
+                  ) : question.type === "stack_reasoning" ? (
+                    <>Which transformation sequence produces the result shown?</>
+                  ) : (
+                    <>
+                      Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
+                      representation of the shape. Which OpenGL transformations result in the picture shown?
+                    </>
+                  )}
                 </p>
               </div>
               <div className="flex-shrink-0">

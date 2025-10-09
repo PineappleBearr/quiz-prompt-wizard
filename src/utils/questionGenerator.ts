@@ -3,10 +3,10 @@ import { SeededRandom } from "./rng";
 
 // Difficulty tiers based on specification
 const TIER_CONFIGS = {
-  1: { transforms: 1, angles: [90, -90, 180], distances: [1.0, 2.0] },
-  2: { transforms: 2, angles: [90, -90, 180, 45, -45], distances: [1.0, 2.0, 1.5] },
-  3: { transforms: 3, angles: [90, -90, 180, 45, -45, 135, -135], distances: [1.0, 2.0, 1.5, 0.5] },
-  4: { transforms: 4, angles: [90, -90, 180, 45, -45, 135, -135, 270, 30, 60], distances: [1.0, 2.0, 1.5, 0.5, 2.5] },
+  1: { transforms: 1, angles: [90, -90, 180], distances: [1.0, 2.0], yDistances: [1.0, 2.0] },
+  2: { transforms: 2, angles: [90, -90, 180, 45, -45], distances: [1.0, 2.0, 1.5], yDistances: [1.0, 1.5, 2.0] },
+  3: { transforms: 3, angles: [90, -90, 180, 45, -45, 135, -135], distances: [1.0, 2.0, 1.5, 0.5], yDistances: [0.5, 1.0, 1.5, 2.0] },
+  4: { transforms: 4, angles: [90, -90, 180, 45, -45, 135, -135, 270, 30, 60], distances: [1.0, 2.0, 1.5, 0.5, 2.5], yDistances: [0.5, 1.0, 1.5, 2.0, 2.5] },
 };
 
 const SHAPES = ["digit1", "letterL", "poly5"];
@@ -16,7 +16,17 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
   const rng = new SeededRandom(seed);
   const config = TIER_CONFIGS[tier as keyof typeof TIER_CONFIGS] || TIER_CONFIGS[1];
 
-  // Generate variant
+  // Generate variant based on question type
+  if (type === "code_picture") {
+    return generateQ5Question(seed, rng, config, tier);
+  } else if (type === "stack_reasoning") {
+    return generateQ6Question(seed, rng, config, tier);
+  } else {
+    return generateQ4Question(seed, rng, config, tier);
+  }
+}
+
+function generateQ4Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
   const shape = rng.choice(SHAPES);
   const frame = tier >= 3 ? rng.choice(FRAMES) : "world";
   const sequence = generateTransformSequence(rng, config, tier);
@@ -37,7 +47,6 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
     attempts++;
   }
   
-  // If we couldn't generate enough unique distractors, add more varied ones
   while (options.length < 4) {
     const extraDistractor = generateDistractor(rng, sequence, tier);
     options.push(extraDistractor);
@@ -48,17 +57,98 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
     JSON.stringify(opt) === JSON.stringify(sequence)
   );
 
-  // Generate question ID based on type
-  const typePrefix = type === "transform_mcq" ? "Q4" : type === "code_picture" ? "Q5" : "Q6";
-  const familyName = type === "transform_mcq" ? "axial-rotation-with-translate" : 
-                     type === "code_picture" ? "code-to-picture" : "stack-reasoning";
+  return {
+    questionId: `Q4-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    seed,
+    type: "transform_mcq",
+    tier,
+    family: "axial-rotation-with-translate",
+    variant: { shape, frame, sequence },
+    options: shuffledOptions,
+    correctIndex,
+  };
+}
+
+function generateQ5Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
+  const shape = rng.choice(SHAPES);
+  const frame = "world";
+  
+  // Q5 uses matrix stack with push/pop operations
+  const sequence = generateMatrixStackSequence(rng, config, tier);
+
+  const options = [sequence];
+  const seenOptions = new Set([JSON.stringify(sequence)]);
+  
+  let attempts = 0;
+  while (options.length < 4 && attempts < 20) {
+    const distractor = generateDistractor(rng, sequence, tier);
+    const distractorKey = JSON.stringify(distractor);
+    
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
+    attempts++;
+  }
+  
+  while (options.length < 4) {
+    options.push(generateDistractor(rng, sequence, tier));
+  }
+
+  const shuffledOptions = rng.shuffle(options);
+  const correctIndex = shuffledOptions.findIndex(opt => 
+    JSON.stringify(opt) === JSON.stringify(sequence)
+  );
 
   return {
-    questionId: `${typePrefix}-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    questionId: `Q5-T${tier}-${shape}-${seed.substring(0, 8)}`,
     seed,
-    type,
+    type: "code_picture",
     tier,
-    family: familyName,
+    family: "code-to-picture-matrix-stack",
+    variant: { shape, frame, sequence },
+    options: shuffledOptions,
+    correctIndex,
+  };
+}
+
+function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: number): Question {
+  const shape = rng.choice(SHAPES);
+  const frame = "world";
+  
+  // Q6 shows code with commented/uncommented lines for debugging
+  const sequence = generateTransformSequence(rng, config, tier);
+
+  const options = [sequence];
+  const seenOptions = new Set([JSON.stringify(sequence)]);
+  
+  let attempts = 0;
+  while (options.length < 4 && attempts < 20) {
+    const distractor = generateDistractor(rng, sequence, tier);
+    const distractorKey = JSON.stringify(distractor);
+    
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
+    attempts++;
+  }
+  
+  while (options.length < 4) {
+    options.push(generateDistractor(rng, sequence, tier));
+  }
+
+  const shuffledOptions = rng.shuffle(options);
+  const correctIndex = shuffledOptions.findIndex(opt => 
+    JSON.stringify(opt) === JSON.stringify(sequence)
+  );
+
+  return {
+    questionId: `Q6-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    seed,
+    type: "stack_reasoning",
+    tier,
+    family: "stack-reasoning-debug",
     variant: { shape, frame, sequence },
     options: shuffledOptions,
     correctIndex,
@@ -68,18 +158,19 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
 function generateTransformSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
   const sequence: Transform[] = [];
   const numTransforms = config.transforms;
+  const use2D = rng.next() < 0.3; // 30% chance of 2D transformations
 
   for (let i = 0; i < numTransforms; i++) {
     if (tier === 1) {
       // Tier 1: Single rotation or translation
       if (rng.next() < 0.5) {
-        const axis: number = rng.choice([0, 1, 2] as const); // x, y, z
+        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const); // z-axis for 2D
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
       } else {
-        const axis: number = rng.choice([0, 1, 2] as const);
-        const dist: number = rng.choice(config.distances);
+        const axis: number = use2D ? rng.choice([0, 1] as const) : rng.choice([0, 1, 2] as const);
+        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
         const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
         sequence.push({ type: "translate", params });
       }
@@ -87,16 +178,40 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
       // Higher tiers: Mix of transforms
       const transformType = rng.next() < 0.6 ? "rotate" : "translate";
       if (transformType === "rotate") {
-        const axis: number = rng.choice([0, 1, 2] as const);
+        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
       } else {
-        const axis: number = rng.choice([0, 1, 2] as const);
-        const dist: number = rng.choice(config.distances);
+        const axis: number = use2D ? rng.choice([0, 1] as const) : rng.choice([0, 1, 2] as const);
+        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
         const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
         sequence.push({ type: "translate", params });
       }
+    }
+  }
+
+  return sequence;
+}
+
+function generateMatrixStackSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
+  // Q5 style: sequences with matrix push/pop operations
+  const sequence: Transform[] = [];
+  const numGroups = Math.min(tier, 3); // 1-3 groups depending on tier
+  
+  for (let g = 0; g < numGroups; g++) {
+    // Add a translation
+    const axis: number = rng.choice([0, 1, 2] as const);
+    const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
+    const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+    sequence.push({ type: "translate", params });
+    
+    // Optionally add a rotation
+    if (rng.next() < 0.7) {
+      const rotAxis: number = rng.choice([0, 1, 2] as const);
+      const angle: number = rng.choice(config.angles);
+      const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
+      sequence.push({ type: "rotate", params: rotParams });
     }
   }
 
