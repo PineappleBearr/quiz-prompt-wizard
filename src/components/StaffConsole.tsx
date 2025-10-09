@@ -100,6 +100,7 @@ export const StaffConsole = () => {
                   <SelectItem value="transform_mcq">Q4-like (Transform MCQ)</SelectItem>
                   <SelectItem value="code_picture">Q5-like (Code→Picture)</SelectItem>
                   <SelectItem value="stack_reasoning">Q6-like (Stack Reasoning)</SelectItem>
+                  <SelectItem value="code_input">Q7-like (Code Input)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

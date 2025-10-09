@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { ThreeScene } from "./ThreeScene";
 import { Question, Transform } from "@/types/question";
 import { toast } from "sonner";
 import { Maximize2 } from "lucide-react";
+import { parseOpenGLCode, compareTransforms } from "@/utils/codeParser";
 
 interface StudentPlayerProps {
   question: Question;
@@ -25,6 +27,8 @@ export const StudentPlayer = ({
   onSubmit 
 }: StudentPlayerProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [codeInput, setCodeInput] = useState<string>("");
+  const [currentTransforms, setCurrentTransforms] = useState<Transform[]>([]);
   const [enlargedViz, setEnlargedViz] = useState<{
     transforms: Transform[];
     shape: string;
@@ -36,19 +40,49 @@ export const StudentPlayer = ({
   // Reset selected answer when question changes
   useEffect(() => {
     setSelectedAnswer(null);
+    setCodeInput("");
+    setCurrentTransforms([]);
   }, [question.questionId]);
 
   const handleSubmit = () => {
-    if (selectedAnswer === null) return;
-    const isCorrect = selectedAnswer === question.correctIndex;
-    
-    if (isCorrect) {
-      toast.success("Correct! Well done!");
+    if (question.type === "code_input") {
+      // Q7: Check if code input matches target
+      if (!question.targetSequence) return;
+      
+      const isCorrect = compareTransforms(currentTransforms, question.targetSequence);
+      
+      if (isCorrect) {
+        toast.success("Correct! Your code produces the target result!");
+      } else {
+        toast.error("Incorrect. The transformation doesn't match the target.");
+      }
+      
+      onSubmit?.(isCorrect ? 0 : -1);
     } else {
-      toast.error(`Incorrect. The correct answer was option ${String.fromCharCode(65 + question.correctIndex)}`);
+      // Q4, Q5, Q6: Multiple choice
+      if (selectedAnswer === null) return;
+      const isCorrect = selectedAnswer === question.correctIndex;
+      
+      if (isCorrect) {
+        toast.success("Correct! Well done!");
+      } else {
+        toast.error(`Incorrect. The correct answer was option ${String.fromCharCode(65 + question.correctIndex)}`);
+      }
+      
+      onSubmit?.(selectedAnswer);
     }
-    
-    onSubmit?.(selectedAnswer);
+  };
+
+  // Handle code input changes and parse in real-time
+  const handleCodeChange = (code: string) => {
+    setCodeInput(code);
+    try {
+      const parsed = parseOpenGLCode(code);
+      setCurrentTransforms(parsed);
+    } catch (e) {
+      // Invalid code, keep previous state
+      console.log("Parse error:", e);
+    }
   };
 
   return (
@@ -60,6 +94,7 @@ export const StudentPlayer = ({
               <CardTitle className="text-2xl">
                 {question.type === "code_picture" ? "Quiz 5 - Code → Picture" : 
                  question.type === "stack_reasoning" ? "Quiz 6 - Stack Reasoning" : 
+                 question.type === "code_input" ? "Quiz 7 - Code Input" :
                  "Quiz 4 - Transform MCQ"}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
@@ -72,6 +107,91 @@ export const StudentPlayer = ({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Q7: Code Input - Show initial and target, let student input code */}
+          {question.type === "code_input" && question.targetSequence && (
+            <div className="space-y-4">
+              <p className="text-base leading-relaxed mb-4">
+                Write OpenGL transformation code to transform the initial shape into the target shape.
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Note:</strong> Use glTranslatef(x, y, z) for translation and glRotatef(angle, x, y, z) for rotation. 
+                The visualization updates in real-time as you type!
+              </p>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-initial`}
+                    shape={question.variant.shape} 
+                    transforms={[]}
+                    width={240}
+                    height={200}
+                  />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Your Result (Real-time):</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-current-${currentTransforms.length}`}
+                    shape={question.variant.shape} 
+                    transforms={currentTransforms}
+                    width={240}
+                    height={200}
+                  />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: currentTransforms, shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="border rounded-lg p-4 bg-muted/20 relative group">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Target State:</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-target`}
+                    shape={question.variant.shape} 
+                    transforms={question.targetSequence}
+                    width={240}
+                    height={200}
+                  />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: question.targetSequence!, shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-medium mb-2">Your Code:</label>
+                <Textarea
+                  value={codeInput}
+                  onChange={(e) => handleCodeChange(e.target.value)}
+                  placeholder="glTranslatef(1.0, 0.0, 0.0);&#10;glRotatef(90.0, 0, 0, 1);"
+                  className="font-mono text-sm min-h-[150px]"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Parsed {currentTransforms.length} transformation{currentTransforms.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Q4: Show initial state, options show both visualization + code */}
           {question.type === "transform_mcq" && (
             <div className="space-y-4">
@@ -207,7 +327,8 @@ export const StudentPlayer = ({
           )}
 
           {/* Options */}
-          <div className={`pt-4 ${question.type === "transform_mcq" ? "grid grid-cols-2 gap-4" : "space-y-3"}`}>
+          {question.type !== "code_input" && (
+            <div className={`pt-4 ${question.type === "transform_mcq" ? "grid grid-cols-2 gap-4" : "space-y-3"}`}>
             <p className="text-sm font-medium text-muted-foreground col-span-2">Select your answer:</p>
             {question.options.map((option, idx) => {
               const optionLabel = String.fromCharCode(65 + idx);
@@ -310,6 +431,7 @@ export const StudentPlayer = ({
               );
             })}
           </div>
+          )}
 
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="flex gap-2">
@@ -333,7 +455,7 @@ export const StudentPlayer = ({
             </div>
             <Button 
               onClick={handleSubmit} 
-              disabled={selectedAnswer === null}
+              disabled={question.type === "code_input" ? codeInput.trim() === "" : selectedAnswer === null}
               size="lg"
             >
               Submit Answer

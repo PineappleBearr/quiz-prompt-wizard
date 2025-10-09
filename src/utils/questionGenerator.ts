@@ -25,6 +25,8 @@ export function generateQuestion(seed: string, type: string, tier: number, quest
     return generateQ5Question(seed, rng, config, tier, shape);
   } else if (type === "stack_reasoning") {
     return generateQ6Question(seed, rng, config, tier, shape);
+  } else if (type === "code_input") {
+    return generateQ7Question(seed, rng, config, tier, shape);
   } else {
     return generateQ4Question(seed, rng, config, tier, shape);
   }
@@ -165,13 +167,13 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
 function generateTransformSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
   const sequence: Transform[] = [];
   const numTransforms = config.transforms;
-  const use2D = tier <= 1 ? rng.next() < 0.7 : rng.next() < 0.3; // Higher tiers use 3D more often
+  const use2D = tier <= 2 ? rng.next() < 0.8 : rng.next() < 0.4; // More 2D questions in lower tiers
 
   for (let i = 0; i < numTransforms; i++) {
     if (tier === 1) {
-      // Tier 1: Simple single axis operations
+      // Tier 1: Simple single axis operations, mostly 2D
       if (rng.next() < 0.5) {
-        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const);
+        const axis: number = use2D ? 2 : rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
@@ -182,10 +184,10 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
         sequence.push({ type: "translate", params });
       }
     } else if (tier === 2) {
-      // Tier 2: Mix of operations with variety
+      // Tier 2: Mix of operations with variety, more 2D
       const transformType = rng.next() < 0.5 ? "rotate" : "translate";
       if (transformType === "rotate") {
-        const axis: number = use2D ? rng.choice([2] as const) : rng.choice([0, 1, 2] as const);
+        const axis: number = use2D ? 2 : rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
@@ -349,4 +351,23 @@ function generateDistractor(rng: SeededRandom, correct: Transform[], tier: numbe
   }
   
   return distractor;
+}
+
+function generateQ7Question(seed: string, rng: SeededRandom, config: any, tier: number, shape: string): Question {
+  const frame = "world";
+  
+  // Q7: Show initial and target state, student inputs code to transform from initial to target
+  const sequence = generateTransformSequence(rng, config, tier);
+
+  return {
+    questionId: `Q7-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    seed,
+    type: "code_input",
+    tier,
+    family: "code-input-transform",
+    variant: { shape, frame, sequence: [] }, // Initial state has no transforms
+    options: [], // Q7 doesn't use options
+    correctIndex: 0,
+    targetSequence: sequence, // The sequence to reach the target state
+  };
 }
