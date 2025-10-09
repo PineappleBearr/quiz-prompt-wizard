@@ -62,7 +62,7 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
     scene.add(createAxisLabel('y', new THREE.Vector3(0, 3.2, 0), 0x00ff00));
     scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 3.2), 0x0000ff));
 
-    // Create shape geometry
+    // Create shape geometry based on variant
     let geometry: THREE.BufferGeometry;
     if (shape === "digit1") {
       // Create a "1" shape
@@ -75,6 +75,30 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
       
       const extrudeSettings = { depth: 0.1, bevelEnabled: false };
       geometry = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
+    } else if (shape === "letterL") {
+      // Create an "L" shape
+      const shapeL = new THREE.Shape();
+      shapeL.moveTo(0, 0);
+      shapeL.lineTo(0.3, 0);
+      shapeL.lineTo(0.3, 1.2);
+      shapeL.lineTo(0.8, 1.2);
+      shapeL.lineTo(0.8, 1.5);
+      shapeL.lineTo(0, 1.5);
+      shapeL.lineTo(0, 0);
+      
+      const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+      geometry = new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
+    } else if (shape === "poly5") {
+      // Create a pentagon
+      const radius = 0.5;
+      const vertices: THREE.Vector2[] = [];
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        vertices.push(new THREE.Vector2(Math.cos(angle) * radius, Math.sin(angle) * radius));
+      }
+      const shapePoly = new THREE.Shape(vertices);
+      const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+      geometry = new THREE.ExtrudeGeometry(shapePoly, extrudeSettings);
     } else {
       // Fallback to box
       geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);

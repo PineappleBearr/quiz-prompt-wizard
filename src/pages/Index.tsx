@@ -68,11 +68,11 @@ const Index = () => {
               <div className="container mx-auto px-6 text-center py-12">
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
-                    No question loaded. Generate a demo question to test the player.
+                    No question loaded. Switch to Staff Console and generate a question.
                   </p>
-                  <Button onClick={loadDemoQuestion} size="lg">
-                    Load Demo Question
-                  </Button>
+                  <p className="text-sm text-muted-foreground">
+                    Questions generated in Staff Console will automatically appear here.
+                  </p>
                 </div>
               </div>
             ) : (

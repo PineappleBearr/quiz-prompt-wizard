@@ -68,8 +68,8 @@ export const StudentPlayer = ({ question, onSubmit }: StudentPlayerProps) => {
                 </p>
               </div>
               <div className="flex-shrink-0">
-                <ThreeScene transforms={[]} shape={question.variant.shape} width={280} height={220} />
-                <p className="text-xs text-center text-muted-foreground mt-1">Original shape</p>
+                <ThreeScene key={question.questionId} transforms={[]} shape={question.variant.shape} width={280} height={220} />
+                <p className="text-xs text-center text-muted-foreground mt-1">Original shape: {question.variant.shape}</p>
               </div>
             </div>
           </div>
@@ -86,7 +86,7 @@ export const StudentPlayer = ({ question, onSubmit }: StudentPlayerProps) => {
                     </Label>
                   </div>
                   <div className="border rounded-lg p-3 space-y-3 hover:border-primary transition-colors">
-                    <ThreeScene transforms={option} shape={question.variant.shape} width={320} height={240} />
+                    <ThreeScene key={`${question.questionId}-${idx}`} transforms={option} shape={question.variant.shape} width={320} height={240} />
                     <div className="bg-codeBg p-2 rounded text-xs font-mono space-y-0.5">
                       {option.map((t, tidx) => (
                         <div key={tidx}>{formatTransform(t)};</div>
