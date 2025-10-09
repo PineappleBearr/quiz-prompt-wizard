@@ -10,6 +10,7 @@ interface ThreeSceneProps {
   showInitialState?: boolean;  // Show both initial and transformed states
   showMultipleInstances?: boolean;  // For Q6: show multiple instances with cumulative transforms
   numInstances?: number;  // Number of instances to show for Q6
+  showAngles?: boolean;  // Show angle labels for rotations
 }
 
 export const ThreeScene = ({ 
@@ -19,7 +20,8 @@ export const ThreeScene = ({
   height = 300, 
   showInitialState = false,
   showMultipleInstances = false,
-  numInstances = 3
+  numInstances = 3,
+  showAngles = true
 }: ThreeSceneProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -113,6 +115,53 @@ export const ThreeScene = ({
     
     // Origin marker
     scene.add(createUnitLabel('0', new THREE.Vector3(-0.3, -0.3, 0), 0x666666));
+    
+    // Add angle labels if enabled
+    if (showAngles) {
+      const rotationTransforms = transforms.filter(t => t.type === "rotate");
+      
+      rotationTransforms.forEach((transform, idx) => {
+        const angle = transform.params[0];
+        const axisX = transform.params[1];
+        const axisY = transform.params[2];
+        const axisZ = transform.params[3];
+        
+        let axisName = '';
+        let position = new THREE.Vector3();
+        let color = 0x000000;
+        
+        if (axisX !== 0) {
+          axisName = 'X';
+          position.set(2.5, 1.5 + idx * 0.5, 0);
+          color = 0xff0000;
+        } else if (axisY !== 0) {
+          axisName = 'Y';
+          position.set(0, 2.5 + idx * 0.5, 0);
+          color = 0x00ff00;
+        } else if (axisZ !== 0) {
+          axisName = 'Z';
+          position.set(0, 1.5 + idx * 0.5, 2.5);
+          color = 0x0000ff;
+        }
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d')!;
+        canvas.width = 200;
+        canvas.height = 80;
+        context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        context.font = 'Bold 36px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(`${angle}°`, 100, 40);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(material);
+        sprite.position.copy(position);
+        sprite.scale.set(1.2, 0.5, 1);
+        scene.add(sprite);
+      });
+    }
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {

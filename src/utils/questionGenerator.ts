@@ -167,49 +167,49 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
 function generateTransformSequence(rng: SeededRandom, config: any, tier: number): Transform[] {
   const sequence: Transform[] = [];
   const numTransforms = config.transforms;
-  const use2D = tier <= 2 ? rng.next() < 0.8 : rng.next() < 0.4; // More 2D questions in lower tiers
+  const is2D = tier <= 2; // Tier 1-2 are 2D only, Tier 3-4 are 3D
 
   for (let i = 0; i < numTransforms; i++) {
     if (tier === 1) {
-      // Tier 1: Simple single axis operations, mostly 2D
+      // Tier 1: Simple single axis operations, 2D only (z-axis rotations)
       if (rng.next() < 0.5) {
-        const axis: number = use2D ? 2 : rng.choice([0, 1, 2] as const);
+        // 2D rotation (z-axis only)
         const angle: number = rng.choice(config.angles);
-        const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
-        sequence.push({ type: "rotate", params });
+        sequence.push({ type: "rotate", params: [angle, 0, 0, 1] });
       } else {
-        const axis: number = use2D ? rng.choice([0, 1] as const) : rng.choice([0, 1, 2] as const);
+        // 2D translation (x or y axis only)
+        const axis: number = rng.choice([0, 1] as const);
         const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
-        const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+        const params = axis === 0 ? [dist, 0, 0] as number[] : [0, dist, 0] as number[];
         sequence.push({ type: "translate", params });
       }
     } else if (tier === 2) {
-      // Tier 2: Mix of operations with variety, more 2D
+      // Tier 2: Mix of operations, 2D only (z-axis rotations)
       const transformType = rng.next() < 0.5 ? "rotate" : "translate";
       if (transformType === "rotate") {
-        const axis: number = use2D ? 2 : rng.choice([0, 1, 2] as const);
+        // 2D rotation (z-axis only)
         const angle: number = rng.choice(config.angles);
-        const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
-        sequence.push({ type: "rotate", params });
+        sequence.push({ type: "rotate", params: [angle, 0, 0, 1] });
       } else {
-        const axis: number = use2D ? rng.choice([0, 1] as const) : rng.choice([0, 1, 2] as const);
+        // 2D translation (x or y axis)
+        const axis: number = rng.choice([0, 1] as const);
         const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
-        const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+        const params = axis === 0 ? [dist, 0, 0] as number[] : [0, dist, 0] as number[];
         sequence.push({ type: "translate", params });
       }
     } else {
-      // Tier 3-4: Complex sequences with alternating transforms and varied axes
+      // Tier 3-4: Complex sequences with 3D rotations and translations
       // Force alternating pattern for complexity
       const shouldRotate = i % 2 === 0 ? rng.next() < 0.6 : rng.next() < 0.4;
       
       if (shouldRotate) {
-        // Use all three axes more frequently
+        // 3D rotation - use all three axes
         const axis: number = rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
         const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
       } else {
-        // Use all three axes more frequently
+        // 3D translation - use all three axes
         const axis: number = rng.choice([0, 1, 2] as const);
         const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
         const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
