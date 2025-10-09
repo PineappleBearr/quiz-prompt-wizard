@@ -63,50 +63,75 @@ export const StudentPlayer = ({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Q4: Show target shape with question */}
+          {/* Q4: Show initial state and target shape */}
           {question.type === "transform_mcq" && (
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  <p className="text-base leading-relaxed">
+                  <p className="text-base leading-relaxed mb-4">
                     Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
                     representation of the shape. Which OpenGL transformations result in the picture shown on the right?
                   </p>
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
+                    <ThreeScene 
+                      key={`${question.questionId}-initial`} 
+                      transforms={[]} 
+                      shape={question.variant.shape} 
+                      width={240} 
+                      height={180} 
+                    />
+                  </div>
                 </div>
                 <div className="flex-shrink-0 border rounded-lg p-4 bg-muted/20">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Target (with initial in gray):</p>
                   <ThreeScene 
                     key={`${question.questionId}-objective`} 
                     transforms={question.variant.sequence} 
                     shape={question.variant.shape} 
                     width={280} 
-                    height={220} 
+                    height={220}
+                    showInitialState={true}
                   />
-                  <p className="text-xs text-center text-muted-foreground mt-2">Target shape</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Q5: Show code, student picks image */}
+          {/* Q5: Show initial state and code */}
           {question.type === "code_picture" && (
             <div className="space-y-4">
-              <p className="text-base leading-relaxed mb-4">
-                What image is drawn by the following code segment?
-              </p>
-              <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
-                {question.variant.sequence.map((transform, idx) => (
-                  <div key={idx}>
-                    {transform.type === "translate" 
-                      ? `glTranslatef(${transform.params.join(", ")});`
-                      : `glRotatef(${transform.params.join(", ")});`
-                    }
+              <div className="flex items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-base leading-relaxed mb-4">
+                    What image is drawn by the following code segment?
+                  </p>
+                  <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
+                    {question.variant.sequence.map((transform, idx) => (
+                      <div key={idx}>
+                        {transform.type === "translate" 
+                          ? `glTranslatef(${transform.params.join(", ")});`
+                          : `glRotatef(${transform.params.join(", ")});`
+                        }
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+                <div className="flex-shrink-0 border rounded-lg p-4 bg-muted/20">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-q5-initial`} 
+                    transforms={[]} 
+                    shape={question.variant.shape} 
+                    width={240} 
+                    height={180} 
+                  />
+                </div>
               </div>
             </div>
           )}
 
-          {/* Q6: Show reference + target, student picks code */}
+          {/* Q6: Show reference (initial) + target with initial state overlay */}
           {question.type === "stack_reasoning" && (
             <div className="space-y-4">
               <p className="text-base leading-relaxed">
@@ -125,13 +150,14 @@ export const StudentPlayer = ({
                   />
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20">
-                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Target Pattern:</p>
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Target Pattern (with initial in gray):</p>
                   <ThreeScene 
                     key={`${question.questionId}-target`}
                     shape={question.variant.shape} 
                     transforms={question.variant.sequence}
                     width={280}
                     height={220}
+                    showInitialState={true}
                   />
                 </div>
               </div>
@@ -172,7 +198,7 @@ export const StudentPlayer = ({
                     </div>
                   )}
                   
-                  {/* Q5: Show image options */}
+                  {/* Q5: Show image options with initial state */}
                   {question.type === "code_picture" && (
                     <div className="flex items-start gap-4">
                       <div className="font-bold text-lg pt-2">{optionLabel}.</div>
@@ -183,6 +209,7 @@ export const StudentPlayer = ({
                           transforms={option}
                           width={300}
                           height={200}
+                          showInitialState={true}
                         />
                       </div>
                     </div>

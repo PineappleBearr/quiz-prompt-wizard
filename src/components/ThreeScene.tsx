@@ -7,9 +7,10 @@ interface ThreeSceneProps {
   shape?: string;
   width?: number;
   height?: number;
+  showInitialState?: boolean;  // Show both initial and transformed states
 }
 
-export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height = 300 }: ThreeSceneProps) => {
+export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height = 300, showInitialState = false }: ThreeSceneProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -62,50 +63,66 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
     scene.add(createAxisLabel('y', new THREE.Vector3(0, 3.2, 0), 0x00ff00));
     scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 3.2), 0x0000ff));
 
-    // Create shape geometry based on variant
-    let geometry: THREE.BufferGeometry;
-    if (shape === "digit1") {
-      // Create a "1" shape
-      const shape1 = new THREE.Shape();
-      shape1.moveTo(0.4, 0);
-      shape1.lineTo(0.6, 0);
-      shape1.lineTo(0.6, 1.5);
-      shape1.lineTo(0.4, 1.5);
-      shape1.lineTo(0.4, 0);
-      
-      const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-      geometry = new THREE.ExtrudeGeometry(shape1, extrudeSettings);
-    } else if (shape === "letterL") {
-      // Create an "L" shape
-      const shapeL = new THREE.Shape();
-      shapeL.moveTo(0, 0);
-      shapeL.lineTo(0.3, 0);
-      shapeL.lineTo(0.3, 1.2);
-      shapeL.lineTo(0.8, 1.2);
-      shapeL.lineTo(0.8, 1.5);
-      shapeL.lineTo(0, 1.5);
-      shapeL.lineTo(0, 0);
-      
-      const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-      geometry = new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
-    } else if (shape === "poly5") {
-      // Create a pentagon
-      const radius = 0.5;
-      const vertices: THREE.Vector2[] = [];
-      for (let i = 0; i < 5; i++) {
-        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-        vertices.push(new THREE.Vector2(Math.cos(angle) * radius, Math.sin(angle) * radius));
+    // Helper function to create geometry based on shape type
+    const createShapeGeometry = (): THREE.BufferGeometry => {
+      if (shape === "digit1") {
+        // Create a "1" shape
+        const shape1 = new THREE.Shape();
+        shape1.moveTo(0.4, 0);
+        shape1.lineTo(0.6, 0);
+        shape1.lineTo(0.6, 1.5);
+        shape1.lineTo(0.4, 1.5);
+        shape1.lineTo(0.4, 0);
+        
+        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shape1, extrudeSettings);
+      } else if (shape === "letterL") {
+        // Create an "L" shape
+        const shapeL = new THREE.Shape();
+        shapeL.moveTo(0, 0);
+        shapeL.lineTo(0.3, 0);
+        shapeL.lineTo(0.3, 1.2);
+        shapeL.lineTo(0.8, 1.2);
+        shapeL.lineTo(0.8, 1.5);
+        shapeL.lineTo(0, 1.5);
+        shapeL.lineTo(0, 0);
+        
+        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
+      } else if (shape === "poly5") {
+        // Create a pentagon
+        const radius = 0.5;
+        const vertices: THREE.Vector2[] = [];
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          vertices.push(new THREE.Vector2(Math.cos(angle) * radius, Math.sin(angle) * radius));
+        }
+        const shapePoly = new THREE.Shape(vertices);
+        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapePoly, extrudeSettings);
+      } else {
+        // Fallback to box
+        return new THREE.BoxGeometry(0.5, 0.5, 0.5);
       }
-      const shapePoly = new THREE.Shape(vertices);
-      const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-      geometry = new THREE.ExtrudeGeometry(shapePoly, extrudeSettings);
-    } else {
-      // Fallback to box
-      geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    };
+
+    // Show initial state (untransformed) if requested
+    if (showInitialState) {
+      const initialGeometry = createShapeGeometry();
+      const initialMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x888888,  // Gray color for initial state
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide 
+      });
+      const initialMesh = new THREE.Mesh(initialGeometry, initialMaterial);
+      scene.add(initialMesh);
     }
 
+    // Create and add the transformed shape
+    const geometry = createShapeGeometry();
     const material = new THREE.MeshPhongMaterial({ 
-      color: 0xff3333,
+      color: 0xff3333,  // Red color for transformed state
       side: THREE.DoubleSide 
     });
     const mesh = new THREE.Mesh(geometry, material);
@@ -145,7 +162,7 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
       material.dispose();
       renderer.dispose();
     };
-  }, [transforms, shape, width, height]);
+  }, [transforms, shape, width, height, showInitialState]);
 
   return <canvas ref={canvasRef} className="border border-border rounded" />;
 };
