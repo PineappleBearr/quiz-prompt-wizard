@@ -68,8 +68,8 @@ export const StudentPlayer = ({ question, onSubmit }: StudentPlayerProps) => {
                 </p>
               </div>
               <div className="flex-shrink-0">
-                <ThreeScene key={question.questionId} transforms={[]} shape={question.variant.shape} width={280} height={220} />
-                <p className="text-xs text-center text-muted-foreground mt-1">Original shape: {question.variant.shape}</p>
+                <ThreeScene key={`${question.questionId}-objective`} transforms={question.variant.sequence} shape={question.variant.shape} width={280} height={220} />
+                <p className="text-xs text-center text-muted-foreground mt-1">Target shape (transformed)</p>
               </div>
             </div>
           </div>

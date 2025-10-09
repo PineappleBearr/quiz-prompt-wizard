@@ -48,12 +48,17 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
     JSON.stringify(opt) === JSON.stringify(sequence)
   );
 
+  // Generate question ID based on type
+  const typePrefix = type === "transform_mcq" ? "Q4" : type === "code_picture" ? "Q5" : "Q6";
+  const familyName = type === "transform_mcq" ? "axial-rotation-with-translate" : 
+                     type === "code_picture" ? "code-to-picture" : "stack-reasoning";
+
   return {
-    questionId: `Q4-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    questionId: `${typePrefix}-T${tier}-${shape}-${seed.substring(0, 8)}`,
     seed,
-    type: "transform_mcq",
+    type,
     tier,
-    family: "axial-rotation-with-translate",
+    family: familyName,
     variant: { shape, frame, sequence },
     options: shuffledOptions,
     correctIndex,
