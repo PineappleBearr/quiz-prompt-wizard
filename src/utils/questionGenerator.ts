@@ -202,22 +202,28 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
 }
 
 function generateRepeatedDrawSequence(rng: SeededRandom, config: any, tier: number, numInstances: number): Transform[] {
-  // Q6 style: Generate a pattern that will be repeated with drawOne() calls
-  // This creates the transforms between each drawOne() call
+  // Q6 style: Generate transforms that will be applied between drawOne() calls
+  // This creates a pattern where each shape is transformed from the previous one
   const sequence: Transform[] = [];
   
-  for (let i = 0; i < numInstances - 1; i++) {
-    // Translation between instances
-    const axis: number = rng.choice([0, 1, 2] as const);
-    const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
-    const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
-    sequence.push({ type: "translate", params });
-    
-    // Rotation between instances
-    const rotAxis: number = rng.choice([0, 1, 2] as const);
-    const angle: number = rng.choice(config.angles);
-    const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
-    sequence.push({ type: "rotate", params: rotParams });
+  // For each instance after the first, add transformations
+  for (let i = 0; i < numInstances; i++) {
+    // Add drawOne call marker (we'll handle this in rendering)
+    if (i > 0) {
+      // Translation to position next instance
+      const axis: number = rng.choice([0, 1, 2] as const);
+      const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
+      const params = axis === 0 ? [dist, 0, 0] as number[] : axis === 1 ? [0, dist, 0] as number[] : [0, 0, dist] as number[];
+      sequence.push({ type: "translate", params });
+      
+      // Rotation for next instance
+      if (tier >= 2) {
+        const rotAxis: number = rng.choice([0, 1, 2] as const);
+        const angle: number = rng.choice(config.angles);
+        const rotParams = rotAxis === 0 ? [angle, 1, 0, 0] as number[] : rotAxis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
+        sequence.push({ type: "rotate", params: rotParams });
+      }
+    }
   }
 
   return sequence;
