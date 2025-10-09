@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -9,11 +9,27 @@ import { toast } from "sonner";
 
 interface StudentPlayerProps {
   question: Question;
+  currentIndex?: number;
+  totalQuestions?: number;
+  onNext?: () => void;
+  onPrev?: () => void;
   onSubmit?: (answer: number) => void;
 }
 
-export const StudentPlayer = ({ question, onSubmit }: StudentPlayerProps) => {
+export const StudentPlayer = ({ 
+  question, 
+  currentIndex = 0, 
+  totalQuestions = 1, 
+  onNext, 
+  onPrev, 
+  onSubmit 
+}: StudentPlayerProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
+
+  // Reset selected answer when question changes
+  useEffect(() => {
+    setSelectedAnswer("");
+  }, [question.questionId]);
 
   const handleSubmit = () => {
     const answerIndex = parseInt(selectedAnswer);
@@ -98,7 +114,26 @@ export const StudentPlayer = ({ question, onSubmit }: StudentPlayerProps) => {
             </div>
           </RadioGroup>
 
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="flex gap-2">
+              <Button 
+                onClick={onPrev} 
+                disabled={currentIndex === 0}
+                variant="outline"
+              >
+                ← Previous
+              </Button>
+              <Button 
+                onClick={onNext} 
+                disabled={currentIndex === totalQuestions - 1}
+                variant="outline"
+              >
+                Next →
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Question {currentIndex + 1} of {totalQuestions}
+            </div>
             <Button 
               onClick={handleSubmit} 
               disabled={selectedAnswer === ""}

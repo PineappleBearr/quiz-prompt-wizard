@@ -13,13 +13,15 @@ export const emitQuestionGenerated = (questions: Question[]) => {
 };
 
 const Index = () => {
-  const [demoQuestion, setDemoQuestion] = useState<Question | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   useEffect(() => {
     const handleQuestionsGenerated = (event: Event) => {
-      const questions = (event as CustomEvent).detail as Question[];
-      if (questions.length > 0) {
-        setDemoQuestion(questions[0]);
+      const newQuestions = (event as CustomEvent).detail as Question[];
+      if (newQuestions.length > 0) {
+        setQuestions(newQuestions);
+        setCurrentQuestionIndex(0); // Reset to first question
       }
     };
 
@@ -29,9 +31,16 @@ const Index = () => {
     };
   }, []);
 
-  const loadDemoQuestion = () => {
-    const question = generateQuestion("demo123456789abc", "transform_mcq", 2);
-    setDemoQuestion(question);
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
   };
 
   return (
@@ -64,7 +73,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="student" className="mt-0">
-            {!demoQuestion ? (
+            {questions.length === 0 ? (
               <div className="container mx-auto px-6 text-center py-12">
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
@@ -76,7 +85,13 @@ const Index = () => {
                 </div>
               </div>
             ) : (
-              <StudentPlayer question={demoQuestion} />
+              <StudentPlayer 
+                question={questions[currentQuestionIndex]} 
+                currentIndex={currentQuestionIndex}
+                totalQuestions={questions.length}
+                onNext={handleNextQuestion}
+                onPrev={handlePrevQuestion}
+              />
             )}
           </TabsContent>
         </Tabs>
