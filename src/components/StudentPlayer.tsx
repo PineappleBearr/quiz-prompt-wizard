@@ -195,33 +195,37 @@ export const StudentPlayer = ({
           {/* Q4: Show initial state, options show both visualization + code */}
           {question.type === "transform_mcq" && (
             <div className="space-y-4">
-              <p className="text-base leading-relaxed mb-4">
-                Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
-                representation of the shape in the xy-plane as shown in the image on the right.
-              </p>
-              <p className="text-sm font-semibold mb-2">
-                Which OpenGL transformations result in the pictures below?
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                <strong>Note:</strong> Distances are in units, angles are in degrees.
-              </p>
-              <div className="border rounded-lg p-4 bg-muted/20 inline-block relative group">
-                <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
-                <ThreeScene 
-                  key={`${question.questionId}-initial`} 
-                  transforms={[]} 
-                  shape={question.variant.shape} 
-                  width={320} 
-                  height={240} 
-                />
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
+              <div className="flex gap-6 items-start">
+                <div className="flex-1">
+                  <p className="text-base leading-relaxed mb-4">
+                    Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
+                    representation of the shape in the xy-plane as shown in the image on the right.
+                  </p>
+                  <p className="text-base font-semibold mb-2">
+                    Which OpenGL transformations result in the pictures below?
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Note:</strong> Distances are in units, angles are in degrees.
+                  </p>
+                </div>
+                <div className="border rounded-lg p-4 bg-muted/20 relative group flex-shrink-0">
+                  <ThreeScene 
+                    key={`${question.questionId}-initial`} 
+                    transforms={[]} 
+                    shape={question.variant.shape} 
+                    width={280} 
+                    height={240}
+                    showAngles={false}
+                  />
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setEnlargedViz({ transforms: [], shape: question.variant.shape })}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -328,8 +332,8 @@ export const StudentPlayer = ({
 
           {/* Options */}
           {question.type !== "code_input" && (
-            <div className={`pt-4 ${question.type === "transform_mcq" ? "grid grid-cols-2 gap-4" : "space-y-3"}`}>
-            <p className="text-sm font-medium text-muted-foreground col-span-2">Select your answer:</p>
+            <div className={`pt-4 ${question.type === "transform_mcq" ? "grid grid-cols-4 gap-4" : "space-y-3"}`}>
+            <p className="text-sm font-medium text-muted-foreground col-span-4">Select your answer:</p>
             {question.options.map((option, idx) => {
               const optionLabel = String.fromCharCode(65 + idx);
               const isSelected = selectedAnswer === idx;
@@ -338,43 +342,43 @@ export const StudentPlayer = ({
                 <button
                   key={idx}
                   onClick={() => setSelectedAnswer(idx)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                  className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                     isSelected 
                       ? "border-primary bg-primary/10" 
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  {/* Q4: Show both visualization and code options */}
+                  {/* Q4: Show visualization on top, code below */}
                   {question.type === "transform_mcq" && (
-                    <div className="space-y-3">
-                      <div className="font-bold text-lg">{optionLabel}.</div>
-                      <div className="border rounded bg-muted/10 p-3 relative group">
+                    <div className="space-y-2">
+                      <div className="border rounded bg-muted/10 p-2 relative group">
                         <ThreeScene 
                           key={`${question.questionId}-option-${idx}`}
                           shape={question.variant.shape} 
                           transforms={option}
-                          width={280}
-                          height={200}
-                          showInitialState={true}
+                          width={200}
+                          height={180}
+                          showInitialState={false}
+                          showAngles={true}
                         />
                         <Button
                           size="icon"
                           variant="secondary"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setEnlargedViz({ transforms: option, shape: question.variant.shape, showInitialState: true });
+                            setEnlargedViz({ transforms: option, shape: question.variant.shape, showInitialState: false });
                           }}
                         >
-                          <Maximize2 className="h-4 w-4" />
+                          <Maximize2 className="h-3 w-3" />
                         </Button>
                       </div>
-                      <div className="bg-codeBg p-3 rounded font-mono text-sm space-y-1">
+                      <div className="bg-codeBg p-2 rounded font-mono text-xs space-y-0.5">
                         {option.map((transform, tidx) => (
                           <div key={tidx}>
                             {transform.type === "translate" 
-                              ? `glTranslatef(${transform.params.map(p => p.toFixed(1)).join(", ")});`
-                              : `glRotatef(${transform.params[0].toFixed(1)}, ${transform.params[1]}, ${transform.params[2]}, ${transform.params[3]});`
+                              ? `glTranslatef(${transform.params.map(p => p.toFixed(1)).join(",")});`
+                              : `glRotatef(${transform.params[0].toFixed(1)},${transform.params[1]},${transform.params[2]},${transform.params[3]});`
                             }
                           </div>
                         ))}
