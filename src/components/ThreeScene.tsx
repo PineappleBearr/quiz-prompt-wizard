@@ -59,9 +59,9 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
       return sprite;
     };
 
-    scene.add(createAxisLabel('x', new THREE.Vector3(3.2, 0, 0), 0xff0000));
-    scene.add(createAxisLabel('y', new THREE.Vector3(0, 3.2, 0), 0x00ff00));
-    scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 3.2), 0x0000ff));
+    scene.add(createAxisLabel('x', new THREE.Vector3(3.3, 0, 0), 0xff0000));
+    scene.add(createAxisLabel('y', new THREE.Vector3(0, 3.3, 0), 0x00ff00));
+    scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 3.3), 0x0000ff));
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
@@ -89,17 +89,20 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
         
         const extrudeSettings = { depth: 0.1, bevelEnabled: false };
         return new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
-      } else if (shape === "poly5") {
-        // Create a pentagon
-        const radius = 0.5;
-        const vertices: THREE.Vector2[] = [];
-        for (let i = 0; i < 5; i++) {
-          const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-          vertices.push(new THREE.Vector2(Math.cos(angle) * radius, Math.sin(angle) * radius));
-        }
-        const shapePoly = new THREE.Shape(vertices);
+      } else if (shape === "arrow") {
+        // Create an arrow shape pointing up
+        const shapeArrow = new THREE.Shape();
+        shapeArrow.moveTo(0, 0.5);        // Tip
+        shapeArrow.lineTo(0.3, 0);        // Right side
+        shapeArrow.lineTo(0.15, 0);       // Right shaft top
+        shapeArrow.lineTo(0.15, -0.5);    // Right shaft bottom
+        shapeArrow.lineTo(-0.15, -0.5);   // Left shaft bottom
+        shapeArrow.lineTo(-0.15, 0);      // Left shaft top
+        shapeArrow.lineTo(-0.3, 0);       // Left side
+        shapeArrow.lineTo(0, 0.5);        // Back to tip
+        
         const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapePoly, extrudeSettings);
+        return new THREE.ExtrudeGeometry(shapeArrow, extrudeSettings);
       } else {
         // Fallback to box
         return new THREE.BoxGeometry(0.5, 0.5, 0.5);

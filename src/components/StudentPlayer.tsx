@@ -66,31 +66,32 @@ export const StudentPlayer = ({
           {/* Q4: Show initial state and target shape */}
           {question.type === "transform_mcq" && (
             <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="flex-1">
-                  <p className="text-base leading-relaxed mb-4">
-                    Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
-                    representation of the shape. Which OpenGL transformations result in the picture shown on the right?
-                  </p>
-                  <div className="border rounded-lg p-4 bg-muted/20">
-                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
-                    <ThreeScene 
-                      key={`${question.questionId}-initial`} 
-                      transforms={[]} 
-                      shape={question.variant.shape} 
-                      width={240} 
-                      height={180} 
-                    />
-                  </div>
+              <p className="text-base leading-relaxed mb-4">
+                Given is a function <code className="bg-codeBg px-2 py-0.5 rounded">drawShape()</code> which draws a wireframe
+                representation of the shape. Which OpenGL transformations result in the picture shown on the right?
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Note:</strong> Distances are in units, angles are in degrees.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
+                  <ThreeScene 
+                    key={`${question.questionId}-initial`} 
+                    transforms={[]} 
+                    shape={question.variant.shape} 
+                    width={320} 
+                    height={240} 
+                  />
                 </div>
-                <div className="flex-shrink-0 border rounded-lg p-4 bg-muted/20">
+                <div className="border rounded-lg p-4 bg-muted/20">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Target (with initial in gray):</p>
                   <ThreeScene 
                     key={`${question.questionId}-objective`} 
                     transforms={question.variant.sequence} 
                     shape={question.variant.shape} 
-                    width={280} 
-                    height={220}
+                    width={320} 
+                    height={240}
                     showInitialState={true}
                   />
                 </div>
@@ -101,30 +102,31 @@ export const StudentPlayer = ({
           {/* Q5: Show initial state and code */}
           {question.type === "code_picture" && (
             <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="flex-1">
-                  <p className="text-base leading-relaxed mb-4">
-                    What image is drawn by the following code segment?
-                  </p>
-                  <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
-                    {question.variant.sequence.map((transform, idx) => (
-                      <div key={idx}>
-                        {transform.type === "translate" 
-                          ? `glTranslatef(${transform.params.join(", ")});`
-                          : `glRotatef(${transform.params.join(", ")});`
-                        }
-                      </div>
-                    ))}
-                  </div>
+              <p className="text-base leading-relaxed mb-4">
+                What image is drawn by the following code segment?
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Note:</strong> Distances are in units, angles are in degrees. Format: glTranslatef(x, y, z) and glRotatef(angle, axisX, axisY, axisZ)
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
+                  {question.variant.sequence.map((transform, idx) => (
+                    <div key={idx}>
+                      {transform.type === "translate" 
+                        ? `glTranslatef(${transform.params.join(", ")});`
+                        : `glRotatef(${transform.params.join(", ")});`
+                      }
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-shrink-0 border rounded-lg p-4 bg-muted/20">
+                <div className="border rounded-lg p-4 bg-muted/20">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
                   <ThreeScene 
                     key={`${question.questionId}-q5-initial`} 
                     transforms={[]} 
                     shape={question.variant.shape} 
-                    width={240} 
-                    height={180} 
+                    width={320} 
+                    height={240} 
                   />
                 </div>
               </div>
@@ -138,6 +140,9 @@ export const StudentPlayer = ({
                 Given is the shape below drawn by using the function <code className="bg-codeBg px-2 py-0.5 rounded">drawOne()</code>. 
                 How can we use this function to draw the target pattern on the right (with {question.variant.numInstances || 3} instances)?
               </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Note:</strong> Distances are in units, angles are in degrees.
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Reference (drawOne):</p>
@@ -145,8 +150,8 @@ export const StudentPlayer = ({
                     key={`${question.questionId}-reference`}
                     shape={question.variant.shape} 
                     transforms={[]}
-                    width={280}
-                    height={220}
+                    width={320}
+                    height={240}
                   />
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20">
@@ -155,8 +160,8 @@ export const StudentPlayer = ({
                     key={`${question.questionId}-target`}
                     shape={question.variant.shape} 
                     transforms={question.variant.sequence}
-                    width={280}
-                    height={220}
+                    width={320}
+                    height={240}
                     showInitialState={true}
                   />
                 </div>
@@ -189,8 +194,8 @@ export const StudentPlayer = ({
                         {option.map((transform, tidx) => (
                           <div key={tidx}>
                             {transform.type === "translate" 
-                              ? `glTranslatef(${transform.params.join(", ")});`
-                              : `glRotatef(${transform.params.join(", ")});`
+                              ? `glTranslatef(${transform.params.map(p => p.toFixed(2)).join(", ")});  // units`
+                              : `glRotatef(${transform.params[0].toFixed(1)}, ${transform.params[1]}, ${transform.params[2]}, ${transform.params[3]});  // degrees`
                             }
                           </div>
                         ))}
