@@ -21,11 +21,26 @@ export function generateQuestion(seed: string, type: string, tier: number): Ques
   const frame = tier >= 3 ? rng.choice(FRAMES) : "world";
   const sequence = generateTransformSequence(rng, config, tier);
 
-  // Generate distractors
+  // Generate distractors - ensure they are unique and different
   const options = [sequence];
-  for (let i = 0; i < 3; i++) {
+  const seenOptions = new Set([JSON.stringify(sequence)]);
+  
+  let attempts = 0;
+  while (options.length < 4 && attempts < 20) {
     const distractor = generateDistractor(rng, sequence, tier);
-    options.push(distractor);
+    const distractorKey = JSON.stringify(distractor);
+    
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
+    attempts++;
+  }
+  
+  // If we couldn't generate enough unique distractors, add more varied ones
+  while (options.length < 4) {
+    const extraDistractor = generateDistractor(rng, sequence, tier);
+    options.push(extraDistractor);
   }
 
   const shuffledOptions = rng.shuffle(options);
@@ -55,7 +70,7 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
       if (rng.next() < 0.5) {
         const axis: number = rng.choice([0, 1, 2] as const); // x, y, z
         const angle: number = rng.choice(config.angles);
-        const params = axis === 0 ? [angle, 0, 0, 1] as number[] : axis === 1 ? [0, angle, 0, 1] as number[] : [0, 0, angle, 1] as number[];
+        const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
       } else {
         const axis: number = rng.choice([0, 1, 2] as const);
@@ -69,7 +84,7 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
       if (transformType === "rotate") {
         const axis: number = rng.choice([0, 1, 2] as const);
         const angle: number = rng.choice(config.angles);
-        const params = axis === 0 ? [angle, 0, 0, 1] as number[] : axis === 1 ? [0, angle, 0, 1] as number[] : [0, 0, angle, 1] as number[];
+        const params = axis === 0 ? [angle, 1, 0, 0] as number[] : axis === 1 ? [angle, 0, 1, 0] as number[] : [angle, 0, 0, 1] as number[];
         sequence.push({ type: "rotate", params });
       } else {
         const axis: number = rng.choice([0, 1, 2] as const);
@@ -85,33 +100,63 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
 
 function generateDistractor(rng: SeededRandom, correct: Transform[], tier: number): Transform[] {
   // Create plausible but wrong alternative
-  const distractor = [...correct];
+  const distractor: Transform[] = JSON.parse(JSON.stringify(correct));
   
-  // Strategy: swap order, flip angle/direction, or change axis
-  const strategy = rng.nextInt(0, 2);
+  // Strategy: swap order, flip angle/direction, change axis, or modify magnitude
+  const strategy = rng.nextInt(0, 3);
   
   if (strategy === 0 && distractor.length > 1) {
-    // Swap order
+    // Swap order of two transforms
     const i = rng.nextInt(0, distractor.length - 2);
     [distractor[i], distractor[i + 1]] = [distractor[i + 1], distractor[i]];
   } else if (strategy === 1) {
-    // Flip a parameter
+    // Flip angle or direction
     const i = rng.nextInt(0, distractor.length - 1);
     if (distractor[i].type === "rotate") {
+      distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
       distractor[i].params[0] = -distractor[i].params[0];
     } else {
+      distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
       const nonZeroIdx = distractor[i].params.findIndex(p => p !== 0);
       if (nonZeroIdx >= 0) {
         distractor[i].params[nonZeroIdx] = -distractor[i].params[nonZeroIdx];
       }
     }
-  } else {
-    // Change axis
+  } else if (strategy === 2) {
+    // Change axis for rotation or translation
     const i = rng.nextInt(0, distractor.length - 1);
     if (distractor[i].type === "rotate") {
-      const oldAngle = distractor[i].params.find(p => p !== 0 && p !== 1) || 90;
-      const newAxis: number = rng.choice([0, 1, 2] as const);
-      distractor[i].params = newAxis === 0 ? [oldAngle, 0, 0, 1] as number[] : newAxis === 1 ? [0, oldAngle, 0, 1] as number[] : [0, 0, oldAngle, 1] as number[];
+      const oldAngle = distractor[i].params[0];
+      // Find current axis
+      const currentAxis = distractor[i].params[1] !== 0 ? 0 : distractor[i].params[2] !== 0 ? 1 : 2;
+      // Choose a different axis
+      const possibleAxes = [0, 1, 2].filter(a => a !== currentAxis);
+      const newAxis: number = rng.choice(possibleAxes as any);
+      distractor[i] = {
+        type: "rotate",
+        params: newAxis === 0 ? [oldAngle, 1, 0, 0] : newAxis === 1 ? [oldAngle, 0, 1, 0] : [oldAngle, 0, 0, 1]
+      };
+    } else {
+      const oldDist = Math.abs(distractor[i].params.find(p => p !== 0) || 1.0);
+      const currentAxis = distractor[i].params[0] !== 0 ? 0 : distractor[i].params[1] !== 0 ? 1 : 2;
+      const possibleAxes = [0, 1, 2].filter(a => a !== currentAxis);
+      const newAxis: number = rng.choice(possibleAxes as any);
+      distractor[i] = {
+        type: "translate",
+        params: newAxis === 0 ? [oldDist, 0, 0] : newAxis === 1 ? [0, oldDist, 0] : [0, 0, oldDist]
+      };
+    }
+  } else {
+    // Change magnitude of translation
+    const i = rng.nextInt(0, distractor.length - 1);
+    if (distractor[i].type === "translate") {
+      distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
+      const nonZeroIdx = distractor[i].params.findIndex(p => p !== 0);
+      if (nonZeroIdx >= 0) {
+        const sign = distractor[i].params[nonZeroIdx] > 0 ? 1 : -1;
+        const newDist = rng.choice([1.0, 1.5, 2.0, 2.5].filter(d => d !== Math.abs(distractor[i].params[nonZeroIdx])));
+        distractor[i].params[nonZeroIdx] = sign * newDist;
+      }
     }
   }
   
