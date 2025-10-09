@@ -39,7 +39,7 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
     const axesHelper = new THREE.AxesHelper(3);
     scene.add(axesHelper);
 
-    // Add axis labels (simplified)
+    // Add axis labels with unit markers
     const createAxisLabel = (text: string, position: THREE.Vector3, color: number) => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d')!;
@@ -59,18 +59,59 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
       return sprite;
     };
 
+    const createUnitLabel = (text: string, position: THREE.Vector3, color: number) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d')!;
+      canvas.width = 64;
+      canvas.height = 64;
+      context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+      context.font = '28px Arial';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(text, 32, 32);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(material);
+      sprite.position.copy(position);
+      sprite.scale.set(0.4, 0.4, 1);
+      return sprite;
+    };
+
+    // Main axis labels
     scene.add(createAxisLabel('x (units)', new THREE.Vector3(3.5, 0, 0), 0xff0000));
     scene.add(createAxisLabel('y (units)', new THREE.Vector3(0, 3.5, 0), 0x00ff00));
     scene.add(createAxisLabel('z (units)', new THREE.Vector3(0, 0, 3.5), 0x0000ff));
     
-    // Add rotation angle indicator text
+    // Add unit number markers along axes
+    // X-axis markers
+    for (let i = -2; i <= 3; i++) {
+      if (i !== 0) {
+        scene.add(createUnitLabel(i.toString(), new THREE.Vector3(i, -0.3, 0), 0xff0000));
+      }
+    }
+    // Y-axis markers
+    for (let i = 1; i <= 3; i++) {
+      scene.add(createUnitLabel(i.toString(), new THREE.Vector3(-0.3, i, 0), 0x00ff00));
+    }
+    // Z-axis markers
+    for (let i = -2; i <= 3; i++) {
+      if (i !== 0) {
+        scene.add(createUnitLabel(i.toString(), new THREE.Vector3(0, -0.3, i), 0x0000ff));
+      }
+    }
+    
+    // Origin marker
+    scene.add(createUnitLabel('0', new THREE.Vector3(-0.3, -0.3, 0), 0x666666));
+    
+    // Add angle reference note
     const createRotationLabel = (text: string, position: THREE.Vector3) => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d')!;
       canvas.width = 256;
       canvas.height = 64;
-      context.fillStyle = '#666666';
-      context.font = '24px Arial';
+      context.fillStyle = '#888888';
+      context.font = '20px Arial';
       context.textAlign = 'center';
       context.textBaseline = 'middle';
       context.fillText(text, 128, 32);
@@ -79,11 +120,11 @@ export const ThreeScene = ({ transforms, shape = "digit1", width = 400, height =
       const material = new THREE.SpriteMaterial({ map: texture });
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
-      sprite.scale.set(1.5, 0.4, 1);
+      sprite.scale.set(1.5, 0.35, 1);
       return sprite;
     };
     
-    scene.add(createRotationLabel('Angles in degrees (°)', new THREE.Vector3(0, -2.5, 0)));
+    scene.add(createRotationLabel('Rotation: degrees (°)', new THREE.Vector3(0, -2.8, 0)));
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
