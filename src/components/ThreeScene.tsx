@@ -165,78 +165,84 @@ export const ThreeScene = ({
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
-      if (shape === "letterF") {
-        // Create an asymmetric "F" shape - clearly shows orientation
-        const shapeF = new THREE.Shape();
-        shapeF.moveTo(0, 0);
-        shapeF.lineTo(0.2, 0);
-        shapeF.lineTo(0.2, 1.0);
-        shapeF.lineTo(0.7, 1.0);
-        shapeF.lineTo(0.7, 1.2);
-        shapeF.lineTo(0.2, 1.2);
-        shapeF.lineTo(0.2, 1.5);
-        shapeF.lineTo(0.6, 1.5);
-        shapeF.lineTo(0.6, 1.7);
-        shapeF.lineTo(0, 1.7);
-        shapeF.lineTo(0, 0);
+      if (shape === "arrow") {
+        // Create an asymmetric arrow shape - clearly shows direction
+        const shapeArrow = new THREE.Shape();
+        // Arrow shaft (wider at base)
+        shapeArrow.moveTo(0.2, 0);
+        shapeArrow.lineTo(0.5, 0);
+        shapeArrow.lineTo(0.5, 1.0);
+        // Arrow head
+        shapeArrow.lineTo(0.9, 1.0);
+        shapeArrow.lineTo(0.35, 1.6);
+        shapeArrow.lineTo(-0.2, 1.0);
+        shapeArrow.lineTo(0.2, 1.0);
+        shapeArrow.lineTo(0.2, 0);
         
         const extrudeSettings = { depth: 0.15, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapeF, extrudeSettings);
-      } else if (shape === "letterP") {
-        // Create an asymmetric "P" shape - vertical stem + top loop
-        const shapeP = new THREE.Shape();
-        // Vertical stem
-        shapeP.moveTo(0, 0);
-        shapeP.lineTo(0.2, 0);
-        shapeP.lineTo(0.2, 1.7);
-        shapeP.lineTo(0.6, 1.7);
-        shapeP.lineTo(0.6, 1.0);
-        shapeP.lineTo(0.2, 1.0);
-        shapeP.lineTo(0.2, 0.2);
-        shapeP.lineTo(0, 0.2);
-        shapeP.lineTo(0, 0);
+        return new THREE.ExtrudeGeometry(shapeArrow, extrudeSettings);
+      } else if (shape === "wedge") {
+        // Create an asymmetric wedge shape - triangular with offset
+        const shapeWedge = new THREE.Shape();
+        shapeWedge.moveTo(0, 0);
+        shapeWedge.lineTo(1.2, 0);
+        shapeWedge.lineTo(1.2, 0.3);
+        shapeWedge.lineTo(0.3, 1.5);
+        shapeWedge.lineTo(0, 1.5);
+        shapeWedge.lineTo(0, 0);
         
-        // Add the loop hole
-        const hole = new THREE.Path();
-        hole.moveTo(0.2, 1.2);
-        hole.lineTo(0.45, 1.2);
-        hole.lineTo(0.45, 1.5);
-        hole.lineTo(0.2, 1.5);
-        hole.lineTo(0.2, 1.2);
-        shapeP.holes.push(hole);
+        const extrudeSettings = { depth: 0.2, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeWedge, extrudeSettings);
+      } else if (shape === "flag") {
+        // Create an asymmetric flag shape - pole with flag at top
+        const shapeFlag = new THREE.Shape();
+        // Pole
+        shapeFlag.moveTo(0, 0);
+        shapeFlag.lineTo(0.15, 0);
+        shapeFlag.lineTo(0.15, 1.8);
+        // Flag
+        shapeFlag.lineTo(1.0, 1.5);
+        shapeFlag.lineTo(1.0, 1.0);
+        shapeFlag.lineTo(0.15, 1.2);
+        shapeFlag.lineTo(0, 1.2);
+        shapeFlag.lineTo(0, 0);
+        
+        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeFlag, extrudeSettings);
+      } else if (shape === "boot") {
+        // Create an asymmetric boot shape
+        const shapeBoot = new THREE.Shape();
+        // Boot sole (horizontal part)
+        shapeBoot.moveTo(0, 0);
+        shapeBoot.lineTo(1.0, 0);
+        shapeBoot.lineTo(1.0, 0.2);
+        // Heel area
+        shapeBoot.lineTo(0.3, 0.2);
+        shapeBoot.lineTo(0.3, 0.5);
+        // Boot shaft (vertical part)
+        shapeBoot.lineTo(0.6, 0.5);
+        shapeBoot.lineTo(0.6, 1.5);
+        shapeBoot.lineTo(0.3, 1.5);
+        shapeBoot.lineTo(0.3, 0.5);
+        shapeBoot.lineTo(0, 0.5);
+        shapeBoot.lineTo(0, 0);
         
         const extrudeSettings = { depth: 0.15, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapeP, extrudeSettings);
-      } else if (shape === "letterL") {
-        // Create an asymmetric "L" shape 
-        const shapeL = new THREE.Shape();
-        shapeL.moveTo(0, 0);
-        shapeL.lineTo(0.7, 0);
-        shapeL.lineTo(0.7, 0.25);
-        shapeL.lineTo(0.25, 0.25);
-        shapeL.lineTo(0.25, 1.5);
-        shapeL.lineTo(0, 1.5);
-        shapeL.lineTo(0, 0);
-        
-        const extrudeSettings = { depth: 0.15, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
+        return new THREE.ExtrudeGeometry(shapeBoot, extrudeSettings);
       } else {
-        // Fallback to letterF
-        const shapeF = new THREE.Shape();
-        shapeF.moveTo(0, 0);
-        shapeF.lineTo(0.2, 0);
-        shapeF.lineTo(0.2, 1.0);
-        shapeF.lineTo(0.7, 1.0);
-        shapeF.lineTo(0.7, 1.2);
-        shapeF.lineTo(0.2, 1.2);
-        shapeF.lineTo(0.2, 1.5);
-        shapeF.lineTo(0.6, 1.5);
-        shapeF.lineTo(0.6, 1.7);
-        shapeF.lineTo(0, 1.7);
-        shapeF.lineTo(0, 0);
+        // Fallback to arrow
+        const shapeArrow = new THREE.Shape();
+        shapeArrow.moveTo(0.2, 0);
+        shapeArrow.lineTo(0.5, 0);
+        shapeArrow.lineTo(0.5, 1.0);
+        shapeArrow.lineTo(0.9, 1.0);
+        shapeArrow.lineTo(0.35, 1.6);
+        shapeArrow.lineTo(-0.2, 1.0);
+        shapeArrow.lineTo(0.2, 1.0);
+        shapeArrow.lineTo(0.2, 0);
         
         const extrudeSettings = { depth: 0.15, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapeF, extrudeSettings);
+        return new THREE.ExtrudeGeometry(shapeArrow, extrudeSettings);
       }
     };
 

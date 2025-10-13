@@ -9,7 +9,7 @@ const TIER_CONFIGS = {
   4: { transforms: 4, angles: [23, -23, 44, -44, 67, -67, 89, -89, 110, -110, 156, -156, 78, -78, 123, -123], distances: [1.0, 2.0, 1.5, 0.5, 2.5, 0.75], yDistances: [0.5, 1.0, 1.5, 2.0, 2.5, 0.75] },
 };
 
-const SHAPES = ["letterF", "letterP", "letterL"];
+const SHAPES = ["arrow", "wedge", "flag", "boot"];
 const FRAMES = ["world", "local"];
 
 export function generateQuestion(seed: string, type: string, tier: number, questionIndex: number = 0): Question {
