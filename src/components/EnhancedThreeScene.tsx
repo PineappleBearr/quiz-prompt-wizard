@@ -152,9 +152,9 @@ export const EnhancedThreeScene = ({
       });
     }
 
-    // Enhanced shape geometry - scaled to fit within ±2 unit bounds for clarity
+    // Enhanced shape geometry - scaled to fit within ±3 unit bounds
     const createShapeGeometry = (): THREE.BufferGeometry => {
-      const scale = 0.35; // Smaller scale to keep shapes clearly within bounds
+      const scale = 0.6; // Scale factor to keep shapes within bounds
       
       if (shape === "arrow") {
         const shapeArrow = new THREE.Shape();
