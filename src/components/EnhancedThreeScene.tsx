@@ -152,65 +152,67 @@ export const EnhancedThreeScene = ({
       });
     }
 
-    // Enhanced shape geometry
+    // Enhanced shape geometry - scaled to fit within ±3 unit bounds
     const createShapeGeometry = (): THREE.BufferGeometry => {
+      const scale = 0.6; // Scale factor to keep shapes within bounds
+      
       if (shape === "arrow") {
         const shapeArrow = new THREE.Shape();
-        shapeArrow.moveTo(0.2, 0);
-        shapeArrow.lineTo(0.5, 0);
-        shapeArrow.lineTo(0.5, 1.0);
-        shapeArrow.lineTo(0.9, 1.0);
-        shapeArrow.lineTo(0.35, 1.6);
-        shapeArrow.lineTo(-0.2, 1.0);
-        shapeArrow.lineTo(0.2, 1.0);
-        shapeArrow.lineTo(0.2, 0);
-        return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 });
+        shapeArrow.moveTo(0.2 * scale, 0);
+        shapeArrow.lineTo(0.5 * scale, 0);
+        shapeArrow.lineTo(0.5 * scale, 1.0 * scale);
+        shapeArrow.lineTo(0.9 * scale, 1.0 * scale);
+        shapeArrow.lineTo(0.35 * scale, 1.6 * scale);
+        shapeArrow.lineTo(-0.2 * scale, 1.0 * scale);
+        shapeArrow.lineTo(0.2 * scale, 1.0 * scale);
+        shapeArrow.lineTo(0.2 * scale, 0);
+        return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "wedge") {
         const shapeWedge = new THREE.Shape();
         shapeWedge.moveTo(0, 0);
-        shapeWedge.lineTo(1.2, 0);
-        shapeWedge.lineTo(1.2, 0.3);
-        shapeWedge.lineTo(0.3, 1.5);
-        shapeWedge.lineTo(0, 1.5);
+        shapeWedge.lineTo(1.2 * scale, 0);
+        shapeWedge.lineTo(1.2 * scale, 0.3 * scale);
+        shapeWedge.lineTo(0.3 * scale, 1.5 * scale);
+        shapeWedge.lineTo(0, 1.5 * scale);
         shapeWedge.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeWedge, { depth: 0.2, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeWedge, { depth: 0.2 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "flag") {
         const shapeFlag = new THREE.Shape();
         shapeFlag.moveTo(0, 0);
-        shapeFlag.lineTo(0.15, 0);
-        shapeFlag.lineTo(0.15, 1.8);
-        shapeFlag.lineTo(1.0, 1.5);
-        shapeFlag.lineTo(1.0, 1.0);
-        shapeFlag.lineTo(0.15, 1.2);
-        shapeFlag.lineTo(0, 1.2);
+        shapeFlag.lineTo(0.15 * scale, 0);
+        shapeFlag.lineTo(0.15 * scale, 1.8 * scale);
+        shapeFlag.lineTo(1.0 * scale, 1.5 * scale);
+        shapeFlag.lineTo(1.0 * scale, 1.0 * scale);
+        shapeFlag.lineTo(0.15 * scale, 1.2 * scale);
+        shapeFlag.lineTo(0, 1.2 * scale);
         shapeFlag.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeFlag, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeFlag, { depth: 0.1 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "boot") {
         const shapeBoot = new THREE.Shape();
         shapeBoot.moveTo(0, 0);
-        shapeBoot.lineTo(1.0, 0);
-        shapeBoot.lineTo(1.0, 0.2);
-        shapeBoot.lineTo(0.3, 0.2);
-        shapeBoot.lineTo(0.3, 0.5);
-        shapeBoot.lineTo(0.6, 0.5);
-        shapeBoot.lineTo(0.6, 1.5);
-        shapeBoot.lineTo(0.3, 1.5);
-        shapeBoot.lineTo(0.3, 0.5);
-        shapeBoot.lineTo(0, 0.5);
+        shapeBoot.lineTo(1.0 * scale, 0);
+        shapeBoot.lineTo(1.0 * scale, 0.2 * scale);
+        shapeBoot.lineTo(0.3 * scale, 0.2 * scale);
+        shapeBoot.lineTo(0.3 * scale, 0.5 * scale);
+        shapeBoot.lineTo(0.6 * scale, 0.5 * scale);
+        shapeBoot.lineTo(0.6 * scale, 1.5 * scale);
+        shapeBoot.lineTo(0.3 * scale, 1.5 * scale);
+        shapeBoot.lineTo(0.3 * scale, 0.5 * scale);
+        shapeBoot.lineTo(0, 0.5 * scale);
         shapeBoot.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeBoot, { depth: 0.15, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeBoot, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       }
       // Default to arrow
       const shapeArrow = new THREE.Shape();
-      shapeArrow.moveTo(0.2, 0);
-      shapeArrow.lineTo(0.5, 0);
-      shapeArrow.lineTo(0.5, 1.0);
-      shapeArrow.lineTo(0.9, 1.0);
-      shapeArrow.lineTo(0.35, 1.6);
-      shapeArrow.lineTo(-0.2, 1.0);
-      shapeArrow.lineTo(0.2, 1.0);
-      shapeArrow.lineTo(0.2, 0);
-      return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 3 });
+      shapeArrow.moveTo(0.2 * scale, 0);
+      shapeArrow.lineTo(0.5 * scale, 0);
+      shapeArrow.lineTo(0.5 * scale, 1.0 * scale);
+      shapeArrow.lineTo(0.9 * scale, 1.0 * scale);
+      shapeArrow.lineTo(0.35 * scale, 1.6 * scale);
+      shapeArrow.lineTo(-0.2 * scale, 1.0 * scale);
+      shapeArrow.lineTo(0.2 * scale, 1.0 * scale);
+      shapeArrow.lineTo(0.2 * scale, 0);
+      return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
     };
 
     // Enhanced materials with better lighting response
