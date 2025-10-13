@@ -15,7 +15,7 @@ interface ThreeSceneProps {
 
 export const ThreeScene = ({ 
   transforms, 
-  shape = "digit1", 
+  shape = "letterF", 
   width = 400, 
   height = 300, 
   showInitialState = false,
@@ -165,47 +165,78 @@ export const ThreeScene = ({
 
     // Helper function to create geometry based on shape type
     const createShapeGeometry = (): THREE.BufferGeometry => {
-      if (shape === "digit1") {
-        // Create a "1" shape
-        const shape1 = new THREE.Shape();
-        shape1.moveTo(0.4, 0);
-        shape1.lineTo(0.6, 0);
-        shape1.lineTo(0.6, 1.5);
-        shape1.lineTo(0.4, 1.5);
-        shape1.lineTo(0.4, 0);
+      if (shape === "letterF") {
+        // Create an asymmetric "F" shape - clearly shows orientation
+        const shapeF = new THREE.Shape();
+        shapeF.moveTo(0, 0);
+        shapeF.lineTo(0.2, 0);
+        shapeF.lineTo(0.2, 1.0);
+        shapeF.lineTo(0.7, 1.0);
+        shapeF.lineTo(0.7, 1.2);
+        shapeF.lineTo(0.2, 1.2);
+        shapeF.lineTo(0.2, 1.5);
+        shapeF.lineTo(0.6, 1.5);
+        shapeF.lineTo(0.6, 1.7);
+        shapeF.lineTo(0, 1.7);
+        shapeF.lineTo(0, 0);
         
-        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shape1, extrudeSettings);
+        const extrudeSettings = { depth: 0.15, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeF, extrudeSettings);
+      } else if (shape === "letterP") {
+        // Create an asymmetric "P" shape - vertical stem + top loop
+        const shapeP = new THREE.Shape();
+        // Vertical stem
+        shapeP.moveTo(0, 0);
+        shapeP.lineTo(0.2, 0);
+        shapeP.lineTo(0.2, 1.7);
+        shapeP.lineTo(0.6, 1.7);
+        shapeP.lineTo(0.6, 1.0);
+        shapeP.lineTo(0.2, 1.0);
+        shapeP.lineTo(0.2, 0.2);
+        shapeP.lineTo(0, 0.2);
+        shapeP.lineTo(0, 0);
+        
+        // Add the loop hole
+        const hole = new THREE.Path();
+        hole.moveTo(0.2, 1.2);
+        hole.lineTo(0.45, 1.2);
+        hole.lineTo(0.45, 1.5);
+        hole.lineTo(0.2, 1.5);
+        hole.lineTo(0.2, 1.2);
+        shapeP.holes.push(hole);
+        
+        const extrudeSettings = { depth: 0.15, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeP, extrudeSettings);
       } else if (shape === "letterL") {
-        // Create an "L" shape
+        // Create an asymmetric "L" shape 
         const shapeL = new THREE.Shape();
         shapeL.moveTo(0, 0);
-        shapeL.lineTo(0.3, 0);
-        shapeL.lineTo(0.3, 1.2);
-        shapeL.lineTo(0.8, 1.2);
-        shapeL.lineTo(0.8, 1.5);
+        shapeL.lineTo(0.7, 0);
+        shapeL.lineTo(0.7, 0.25);
+        shapeL.lineTo(0.25, 0.25);
+        shapeL.lineTo(0.25, 1.5);
         shapeL.lineTo(0, 1.5);
         shapeL.lineTo(0, 0);
         
-        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
+        const extrudeSettings = { depth: 0.15, bevelEnabled: false };
         return new THREE.ExtrudeGeometry(shapeL, extrudeSettings);
-      } else if (shape === "arrow") {
-        // Create an arrow shape pointing up
-        const shapeArrow = new THREE.Shape();
-        shapeArrow.moveTo(0, 0.5);        // Tip
-        shapeArrow.lineTo(0.3, 0);        // Right side
-        shapeArrow.lineTo(0.15, 0);       // Right shaft top
-        shapeArrow.lineTo(0.15, -0.5);    // Right shaft bottom
-        shapeArrow.lineTo(-0.15, -0.5);   // Left shaft bottom
-        shapeArrow.lineTo(-0.15, 0);      // Left shaft top
-        shapeArrow.lineTo(-0.3, 0);       // Left side
-        shapeArrow.lineTo(0, 0.5);        // Back to tip
-        
-        const extrudeSettings = { depth: 0.1, bevelEnabled: false };
-        return new THREE.ExtrudeGeometry(shapeArrow, extrudeSettings);
       } else {
-        // Fallback to box
-        return new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        // Fallback to letterF
+        const shapeF = new THREE.Shape();
+        shapeF.moveTo(0, 0);
+        shapeF.lineTo(0.2, 0);
+        shapeF.lineTo(0.2, 1.0);
+        shapeF.lineTo(0.7, 1.0);
+        shapeF.lineTo(0.7, 1.2);
+        shapeF.lineTo(0.2, 1.2);
+        shapeF.lineTo(0.2, 1.5);
+        shapeF.lineTo(0.6, 1.5);
+        shapeF.lineTo(0.6, 1.7);
+        shapeF.lineTo(0, 1.7);
+        shapeF.lineTo(0, 0);
+        
+        const extrudeSettings = { depth: 0.15, bevelEnabled: false };
+        return new THREE.ExtrudeGeometry(shapeF, extrudeSettings);
       }
     };
 

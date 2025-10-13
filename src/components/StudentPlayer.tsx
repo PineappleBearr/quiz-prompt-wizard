@@ -111,11 +111,11 @@ export const StudentPlayer = ({
           {question.type === "code_input" && question.targetSequence && (
             <div className="space-y-4">
               <p className="text-base leading-relaxed mb-4">
-                Write OpenGL transformation code to transform the initial shape into the target shape.
+                Write the <strong>exact sequence</strong> of OpenGL transformation code to transform the initial shape into the target shape.
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 <strong>Note:</strong> Use glTranslatef(x, y, z) for translation and glRotatef(angle, x, y, z) for rotation. 
-                The visualization updates in real-time as you type!
+                The transformations must be in the correct order. The visualization updates in real-time as you type!
               </p>
               
               <div className="grid grid-cols-3 gap-4">
@@ -202,10 +202,11 @@ export const StudentPlayer = ({
                     representation of the shape in the xy-plane as shown in the image on the right.
                   </p>
                   <p className="text-base font-semibold mb-2">
-                    Which OpenGL transformations result in the pictures below?
+                    Which sequence of OpenGL transformations, <strong>applied in the exact order shown</strong>, 
+                    results in the pictures below?
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    <strong>Note:</strong> Distances are in units, angles are in degrees.
+                    <strong>Note:</strong> Distances are in units, angles are in degrees. Transformation order matters!
                   </p>
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20 relative group flex-shrink-0">
@@ -234,10 +235,11 @@ export const StudentPlayer = ({
           {question.type === "code_picture" && (
             <div className="space-y-4">
               <p className="text-base leading-relaxed mb-4">
-                What image is drawn by the following code segment?
+                What image is drawn by executing the following transformation sequence <strong>in the exact order shown</strong>?
               </p>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Note:</strong> Distances are in units, angles are in degrees. Format: glTranslatef(x, y, z) and glRotatef(angle, axisX, axisY, axisZ)
+                <strong>Note:</strong> Distances are in units, angles are in degrees. The asymmetric shape makes orientation visible. 
+                Format: glTranslatef(x, y, z) and glRotatef(angle, axisX, axisY, axisZ)
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
@@ -277,10 +279,10 @@ export const StudentPlayer = ({
             <div className="space-y-4">
               <p className="text-base leading-relaxed mb-4">
                 Given is the shape below drawn by using the function <code className="bg-codeBg px-2 py-0.5 rounded">drawOne()</code>. 
-                How can we use this function to draw the object on the right?
+                Which <strong>exact sequence</strong> of transformations between drawOne() calls produces the pattern on the right?
               </p>
               <p className="text-sm text-muted-foreground mb-4">
-                <strong>Note:</strong> Distances are in units, angles are in degrees.
+                <strong>Note:</strong> Distances are in units, angles are in degrees. Transformation order matters!
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
