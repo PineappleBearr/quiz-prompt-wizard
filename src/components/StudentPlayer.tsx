@@ -92,10 +92,10 @@ export const StudentPlayer = ({
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-2xl">
-                {question.type === "code_picture" ? "Quiz 5 - Code → Picture" : 
-                 question.type === "stack_reasoning" ? "Quiz 6 - Stack Reasoning" : 
-                 question.type === "code_input" ? "Quiz 7 - Code Input" :
-                 "Quiz 4 - Transform MCQ"}
+                {question.type === "code_picture" ? "Code to Picture" : 
+                 question.type === "stack_reasoning" ? "Stack Reasoning" : 
+                 question.type === "code_input" ? "Code Input Challenge" :
+                 "Transformation Sequence"}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Question ID: {question.questionId} | Tier {question.tier}
