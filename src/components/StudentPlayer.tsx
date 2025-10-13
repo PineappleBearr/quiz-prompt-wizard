@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ThreeScene } from "./ThreeScene";
+import { EnhancedThreeScene } from "./EnhancedThreeScene";
 import { Question, Transform } from "@/types/question";
 import { toast } from "sonner";
 import { Maximize2 } from "lucide-react";
@@ -86,8 +86,8 @@ export const StudentPlayer = ({
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <Card>
+    <div className="container mx-auto p-6 max-w-6xl animate-fade-in">
+      <Card className="shadow-lg"  style={{ boxShadow: 'var(--shadow-card)' }}>
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
@@ -121,12 +121,13 @@ export const StudentPlayer = ({
               <div className="grid grid-cols-3 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-initial`}
                     shape={question.variant.shape} 
                     transforms={[]}
                     width={240}
                     height={200}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -140,12 +141,13 @@ export const StudentPlayer = ({
 
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Your Result (Real-time):</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-current-${currentTransforms.length}`}
                     shape={question.variant.shape} 
                     transforms={currentTransforms}
                     width={240}
                     height={200}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -159,12 +161,13 @@ export const StudentPlayer = ({
 
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Target State:</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-target`}
                     shape={question.variant.shape} 
                     transforms={question.targetSequence}
                     width={240}
                     height={200}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -210,13 +213,14 @@ export const StudentPlayer = ({
                   </p>
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20 relative group flex-shrink-0">
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-initial`} 
                     transforms={[]} 
                     shape={question.variant.shape} 
                     width={280} 
                     height={240}
                     showAngles={false}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -254,12 +258,13 @@ export const StudentPlayer = ({
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Initial State:</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-q5-initial`} 
                     transforms={[]} 
                     shape={question.variant.shape} 
                     width={320} 
-                    height={240} 
+                    height={240}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -287,12 +292,13 @@ export const StudentPlayer = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Reference (drawOne):</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-reference`}
                     shape={question.variant.shape} 
                     transforms={[]}
                     width={320}
                     height={240}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -305,7 +311,7 @@ export const StudentPlayer = ({
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
                   <p className="text-xs text-muted-foreground mb-2 font-semibold">Target Pattern:</p>
-                  <ThreeScene 
+                  <EnhancedThreeScene 
                     key={`${question.questionId}-target`}
                     shape={question.variant.shape} 
                     transforms={question.variant.sequence}
@@ -313,6 +319,7 @@ export const StudentPlayer = ({
                     height={240}
                     showMultipleInstances={true}
                     numInstances={question.variant.numInstances || 3}
+                    interactive={false}
                   />
                   <Button
                     size="icon"
@@ -354,7 +361,7 @@ export const StudentPlayer = ({
                   {question.type === "transform_mcq" && (
                     <div className="space-y-2">
                       <div className="border rounded bg-muted/10 p-2 relative group">
-                        <ThreeScene 
+                        <EnhancedThreeScene 
                           key={`${question.questionId}-option-${idx}`}
                           shape={question.variant.shape} 
                           transforms={option}
@@ -362,6 +369,7 @@ export const StudentPlayer = ({
                           height={180}
                           showInitialState={false}
                           showAngles={true}
+                          interactive={false}
                         />
                         <Button
                           size="icon"
@@ -411,13 +419,14 @@ export const StudentPlayer = ({
                     <div className="flex items-start gap-4">
                       <div className="font-bold text-lg pt-2">{optionLabel}.</div>
                       <div className="flex-1 border rounded bg-muted/10 p-2 relative group">
-                        <ThreeScene 
+                        <EnhancedThreeScene 
                           key={`${question.questionId}-option-${idx}`}
                           shape={question.variant.shape} 
                           transforms={option}
                           width={300}
                           height={200}
                           showInitialState={true}
+                          interactive={false}
                         />
                         <Button
                           size="icon"
@@ -474,7 +483,7 @@ export const StudentPlayer = ({
         <DialogContent className="max-w-4xl">
           {enlargedViz && (
             <div className="flex items-center justify-center p-4">
-              <ThreeScene
+              <EnhancedThreeScene
                 transforms={enlargedViz.transforms}
                 shape={enlargedViz.shape}
                 width={800}
@@ -482,6 +491,7 @@ export const StudentPlayer = ({
                 showInitialState={enlargedViz.showInitialState}
                 showMultipleInstances={enlargedViz.showMultipleInstances}
                 numInstances={enlargedViz.numInstances}
+                interactive={true}
               />
             </div>
           )}

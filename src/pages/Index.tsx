@@ -45,26 +45,34 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-6 py-4">
+      <header className="border-b bg-card shadow-sm">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">CG ExamGen</h1>
-              <p className="text-sm text-muted-foreground">Computer Graphics Exam Generator</p>
+            <div className="animate-fade-in">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                CG ExamGen
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Computer Graphics Exam Generator - 3D Transformations
+              </p>
             </div>
-            <div className="text-sm text-muted-foreground">
-              Weeks 4-6: Transformations, Texture Mapping, Ray-Tracing
+            <div className="text-sm text-muted-foreground bg-secondary px-4 py-2 rounded-lg">
+              Topics: Transformations, Texture Mapping, Ray-Tracing
             </div>
           </div>
         </div>
       </header>
 
-      <main className="py-6">
+      <main className="py-8">
         <Tabs defaultValue="staff" className="w-full">
-          <div className="container mx-auto px-6 mb-6">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-              <TabsTrigger value="staff">Staff Console</TabsTrigger>
-              <TabsTrigger value="student">Student Player</TabsTrigger>
+          <div className="container mx-auto px-6 mb-8">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 shadow-md">
+              <TabsTrigger value="staff" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow">
+                Staff Console
+              </TabsTrigger>
+              <TabsTrigger value="student" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow">
+                Student Player
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -74,13 +82,18 @@ const Index = () => {
 
           <TabsContent value="student" className="mt-0">
             {questions.length === 0 ? (
-              <div className="container mx-auto px-6 text-center py-12">
-                <div className="space-y-4">
-                  <p className="text-muted-foreground">
-                    No question loaded. Switch to Staff Console and generate a question.
+              <div className="container mx-auto px-6 text-center py-16">
+                <div className="space-y-4 max-w-lg mx-auto animate-fade-in">
+                  <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-medium text-foreground">
+                    No question loaded yet
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Questions generated in Staff Console will automatically appear here.
+                    Switch to Staff Console and generate questions to begin. Questions will automatically appear here for students to solve.
                   </p>
                 </div>
               </div>
@@ -97,10 +110,19 @@ const Index = () => {
         </Tabs>
       </main>
 
-      <footer className="border-t bg-card mt-12">
-        <div className="container mx-auto px-6 py-6 text-center text-sm text-muted-foreground">
-          <p>CG ExamGen v1.0 - Deterministic exam generation with anti-collusion design</p>
-          <p className="mt-1">Features: Tier-based difficulty, seeded RNG, transform MCQ (Quiz 4-style)</p>
+      <footer className="border-t bg-card mt-16 shadow-inner">
+        <div className="container mx-auto px-6 py-8 text-center">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">
+              CG ExamGen v1.0
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Deterministic exam generation with anti-collusion design
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Features: Tier-based difficulty • Seeded RNG • Interactive 3D visualizations
+            </p>
+          </div>
         </div>
       </footer>
     </div>
