@@ -1,5 +1,6 @@
 import { Question, Transform } from "@/types/question";
 import { SeededRandom } from "./rng";
+import { generateRaySphereQuestion } from "./raySphere";
 
 // Difficulty tiers based on specification
 const TIER_CONFIGS = {
@@ -27,6 +28,8 @@ export function generateQuestion(seed: string, type: string, tier: number, quest
     return generateQ6Question(seed, rng, config, tier, shape);
   } else if (type === "code_input") {
     return generateQ7Question(seed, rng, config, tier, shape);
+  } else if (type === "ray_sphere") {
+    return generateQ8RaySphereQuestion(seed, tier, shape);
   } else {
     return generateQ4Question(seed, rng, config, tier, shape);
   }
@@ -369,5 +372,23 @@ function generateQ7Question(seed: string, rng: SeededRandom, config: any, tier: 
     options: [], // Q7 doesn't use options
     correctIndex: 0,
     targetSequence: sequence, // The sequence to reach the target state
+  };
+}
+
+function generateQ8RaySphereQuestion(seed: string, tier: number, shape: string): Question {
+  // Map tier to ray-sphere levels: 1-2 -> A, 3 -> B, 4 -> C
+  const level: "A" | "B" | "C" = tier <= 2 ? "A" : tier === 3 ? "B" : "C";
+  const raySphereData = generateRaySphereQuestion(level);
+
+  return {
+    questionId: `Q8-T${tier}-${shape}-${seed.substring(0, 8)}`,
+    seed,
+    type: "ray_sphere",
+    tier,
+    family: "ray-sphere-intersection",
+    variant: { shape, frame: "world", sequence: [] },
+    options: [],
+    correctIndex: 0,
+    raySphereData,
   };
 }

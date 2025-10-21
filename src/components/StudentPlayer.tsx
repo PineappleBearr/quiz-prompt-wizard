@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { EnhancedThreeScene } from "./EnhancedThreeScene";
+import { RaySpherePlayer } from "./RaySpherePlayer";
 import { Question, Transform } from "@/types/question";
 import { toast } from "sonner";
 import { Maximize2 } from "lucide-react";
@@ -84,6 +85,29 @@ export const StudentPlayer = ({
       console.log("Parse error:", e);
     }
   };
+
+  // Handle ray-sphere questions separately
+  if (question.type === "ray_sphere" && question.raySphereData) {
+    return (
+      <div className="container mx-auto p-6 max-w-6xl animate-fade-in">
+        <RaySpherePlayer 
+          question={question.raySphereData}
+          onSubmit={onSubmit}
+        />
+        <div className="flex justify-between mt-6">
+          <Button onClick={onPrev} disabled={!onPrev || currentIndex === 0} variant="outline">
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Question {currentIndex + 1} of {totalQuestions}
+          </span>
+          <Button onClick={onNext} disabled={!onNext || currentIndex >= totalQuestions - 1} variant="outline">
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-6xl animate-fade-in">

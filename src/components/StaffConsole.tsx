@@ -101,6 +101,7 @@ export const StaffConsole = () => {
                   <SelectItem value="code_picture">Code to Picture</SelectItem>
                   <SelectItem value="stack_reasoning">Stack Reasoning</SelectItem>
                   <SelectItem value="code_input">Code Input Challenge</SelectItem>
+                  <SelectItem value="ray_sphere">Ray-Sphere Intersection</SelectItem>
                 </SelectContent>
               </Select>
             </div>
