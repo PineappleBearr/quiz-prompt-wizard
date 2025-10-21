@@ -68,10 +68,10 @@ const Index = () => {
           <div className="container mx-auto px-6 mb-8">
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 shadow-md">
               <TabsTrigger value="staff" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow">
-                Staff Console
+                Generator
               </TabsTrigger>
               <TabsTrigger value="student" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow">
-                Student Player
+                Output Question
               </TabsTrigger>
             </TabsList>
           </div>
@@ -93,7 +93,7 @@ const Index = () => {
                     No question loaded yet
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Switch to Staff Console and generate questions to begin. Questions will automatically appear here for students to solve.
+                    Switch to Generator and create questions to begin. Questions will automatically appear here.
                   </p>
                 </div>
               </div>

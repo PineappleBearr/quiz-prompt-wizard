@@ -11,8 +11,6 @@ import { toast } from "sonner";
 import { emitQuestionGenerated } from "@/pages/Index";
 
 export const StaffConsole = () => {
-  const [examKey, setExamKey] = useState("S2025|E3|slot1");
-  const [studentId, setStudentId] = useState("stu:12345");
   const [questionType, setQuestionType] = useState("transform_mcq");
   const [tier, setTier] = useState("1");
   const [count, setCount] = useState("1");
@@ -25,8 +23,12 @@ export const StaffConsole = () => {
       const questions: Question[] = [];
       const numQuestions = parseInt(count);
       
+      // Use default values for seed generation
+      const defaultExamKey = "default_exam";
+      const defaultStudentId = "default_student";
+      
       for (let i = 0; i < numQuestions; i++) {
-        const seed = await generateSeed(examKey, studentId, i, questionType, parseInt(tier));
+        const seed = await generateSeed(defaultExamKey, defaultStudentId, i, questionType, parseInt(tier));
         const question = generateQuestion(seed, questionType, parseInt(tier), i);
         questions.push(question);
       }
@@ -48,7 +50,7 @@ export const StaffConsole = () => {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `exam_${examKey}_${studentId}.json`;
+    link.download = `generated_questions_${Date.now()}.json`;
     link.click();
     toast.success("Exported questions as JSON");
   };
@@ -57,7 +59,7 @@ export const StaffConsole = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">CG ExamGen Staff Console</h1>
+          <h1 className="text-3xl font-bold text-foreground">Question Generator</h1>
           <p className="text-muted-foreground">Configure and generate exam questions</p>
         </div>
       </div>
@@ -68,27 +70,6 @@ export const StaffConsole = () => {
           <CardDescription>Configure exam parameters and generate questions</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="examKey">Exam Key</Label>
-              <Input 
-                id="examKey" 
-                value={examKey} 
-                onChange={(e) => setExamKey(e.target.value)}
-                placeholder="S2025|E3|slot1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="studentId">Student ID</Label>
-              <Input 
-                id="studentId" 
-                value={studentId} 
-                onChange={(e) => setStudentId(e.target.value)}
-                placeholder="stu:12345"
-              />
-            </div>
-          </div>
-
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Question Type</Label>
