@@ -104,20 +104,20 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
         <CardContent className="space-y-4">
           {question.level === "A" && (
             <>
-              <div className="space-y-2 text-sm">
-                <p><strong>Step 1 – Closest distance:</strong> From the picture, compare the closest distance ρ from the ray to the sphere center with the radius r. Pick one that holds.</p>
+              <div className="space-y-3 text-sm leading-relaxed">
+                <p><strong>Step 1 – Closest distance:</strong> From the picture, compare the closest distance ρ from the ray to the sphere center with the radius <em>r</em>. Pick the relation that holds.</p>
                 <p><strong>Step 2 – Discriminant:</strong> From your choice, pick the sign of Δ.</p>
-                <p><strong>Step 3 – Consequence & hit:</strong> State what your Δ implies and whether there is a forward hit (t ≥ 0) along +d.</p>
+                <p><strong>Step 3 – Consequence & hit:</strong> State what your Δ implies and whether there is a forward hit (t ≥ 0) along +d).</p>
               </div>
               
-              <div className="bg-muted/30 p-4 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-2"><strong>Reference (no numeric work required):</strong></p>
-                <div className="font-mono text-sm space-y-1">
-                  <p>p(t) = o + t d</p>
-                  <p>ρ = ||(c - o) - ((c - o) · d) d||</p>
-                  <p>ρ &gt; r ⇒ Δ &lt; 0; ρ = r ⇒ Δ = 0; ρ &lt; r ⇒ Δ &gt; 0</p>
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-sm mb-3"><strong>Reference (no numeric work required):</strong></p>
+                <div className="text-center space-y-2 my-4">
+                  <p className="font-serif italic text-base">p(t) = o + t d</p>
+                  <p className="font-serif italic text-base">ρ = ||(c − o) − ((c − o) · d) d||</p>
+                  <p className="font-serif italic text-base">ρ &gt; r ⇒ Δ &lt; 0;  ρ = r ⇒ Δ = 0;  ρ &lt; r ⇒ Δ &gt; 0</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">Hint: judge visually (closest distance vs radius), then complete Δ and Hit.</p>
+                <p className="text-sm text-muted-foreground mt-4">Hint: judge visually (closest distance vs radius), then complete Δ and Hit.</p>
               </div>
             </>
           )}
