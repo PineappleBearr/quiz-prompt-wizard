@@ -65,6 +65,12 @@ export const StaffConsole = () => {
         </div>
       </div>
 
+      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
+        <p className="text-sm text-foreground">
+          💡 <strong>Tip:</strong> After generating questions, switch to the <strong>Output Question</strong> tab to view and interact with them.
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Generation Controls</CardTitle>
