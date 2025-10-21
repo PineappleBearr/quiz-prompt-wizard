@@ -130,28 +130,28 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
 
           {question.level === "B" && (
             <>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-sm leading-relaxed">
                 <p><strong>Analyze – Tangency Hunter</strong></p>
-                <p><strong>Required Formulas:</strong></p>
-                <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li>p(t) = o + t d</li>
-                  <li>ρ = ||(c − o) − d||</li>
-                  <li>g = ||(c − o) − m ρ||</li>
-                  <li>Window: [t] = s ∈ r</li>
-                </ul>
+                <p>If you are not exactly at tangent baseline, then fine-tune yaw/pitch.</p>
+                <p>Explain how the formulas indicate exact tangency, and describe which variable relationships must hold at tangency.</p>
               </div>
               
-              <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2">
-                <p>If p is not exactly at tangent baseline, then fine-tune yaw/pitch.</p>
-                <p>Explain how the formulas indicate exact tangency, and describe which variable relationships must hold at tangency.</p>
-                <p>Hint: p = x 2.278 | t = 1.248 | |p−c| = 1.024=0.0 (target = 0.001)</p>
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-sm mb-3"><strong>Reference (no numeric work required):</strong></p>
+                <div className="text-center space-y-2 my-4">
+                  <p className="font-serif italic text-base">p(t) = o + t d</p>
+                  <p className="font-serif italic text-base">m = (c − o) · d</p>
+                  <p className="font-serif italic text-base">ρ = ||(c − o) − m d||</p>
+                  <p className="font-serif italic text-base">tangent ⇔ ρ = r  (within ε)</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">Hint: At exact tangency, the closest distance ρ equals radius r. Use controls to verify |ρ−r| ≈ 0.</p>
               </div>
             </>
           )}
 
           {question.level === "C" && (
             <>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3 text-sm leading-relaxed">
                 <p><strong>Evaluate with t-window and four spheres</strong></p>
                 <ol className="list-decimal list-inside space-y-1 ml-2">
                   <li>Filter out spheres whose all hits fall outside [a,b].</li>
@@ -161,13 +161,16 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
                 </ol>
               </div>
               
-              <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-1">
-                <p><strong>Formulas:</strong></p>
-                <p>Ray: t ≥ 0</p>
-                <p>Projection: m = (c − o) · d</p>
-                <p>Perpendicular distance: ρ = ||(c − o) − (m)d|| − m ρ||</p>
-                <p>Selection: choose smallest t ∈ [0, tWindow.counts as hit</p>
-                <p>Window test: valid iff t ∈ [a,b] within ε</p>
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-sm mb-3"><strong>Reference (no numeric work required):</strong></p>
+                <div className="text-center space-y-2 my-4">
+                  <p className="font-serif italic text-base">p(t) = o + t d</p>
+                  <p className="font-serif italic text-base">m = (c − o) · d</p>
+                  <p className="font-serif italic text-base">ρ = ||(c − o) − m d||</p>
+                  <p className="font-serif italic text-base">Selection: choose smallest t ∈ [a,b], tangent counts as hit</p>
+                  <p className="font-serif italic text-base">Window test: valid iff t ∈ [a,b] within ε</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">Hint: Evaluate each sphere, filter by window [a,b], pick nearest valid t. Ties broken by lowest index.</p>
               </div>
             </>
           )}
