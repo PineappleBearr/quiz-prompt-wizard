@@ -1,73 +1,80 @@
-# Welcome to your Lovable project
+# Interactive Graphics Quiz Platform
 
-## Project info
+A web-based educational platform for computer graphics concepts, featuring interactive 3D transformations and ray-sphere intersection problems.
 
-**URL**: https://lovable.dev/projects/4be38373-8106-496f-93a3-16fae584a5ea
+## Features
 
-## How can I edit this code?
+- **3D Transformation Exercises**: Interactive questions covering translation, rotation, and matrix transformations
+- **Ray-Sphere Intersection Problems**: Three difficulty levels testing geometric ray tracing concepts
+- **Real-time Visualization**: Live 3D rendering with Three.js showing transformations as students work
+- **Deterministic Question Generation**: Seeded random generation ensures consistent questions per student
+- **Multiple Question Types**: Multiple choice, code input, and visual matching formats
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18 with TypeScript
+- **3D Graphics**: Three.js with React Three Fiber
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **UI Components**: Radix UI primitives with custom styling
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4be38373-8106-496f-93a3-16fae584a5ea) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 16+ and npm (or bun)
+- Modern browser with WebGL support
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone <repository-url>
+cd <project-directory>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build for Production
 
-**Use GitHub Codespaces**
+```sh
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # React components
+│   ├── EnhancedThreeScene.tsx    # 3D visualization
+│   ├── RaySpherePlayer.tsx       # Ray-sphere question interface
+│   ├── StudentPlayer.tsx         # Main quiz interface
+│   └── ui/                       # Reusable UI components
+├── utils/              # Utility functions
+│   ├── questionGenerator.ts      # Question generation logic
+│   ├── rng.ts                    # Seeded random number generator
+│   └── raySphere.ts              # Ray-sphere intersection logic
+└── types/              # TypeScript type definitions
+```
 
-This project is built with:
+## Question Types
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Q4**: Multiple choice - select correct transformation sequence
+- **Q5**: Code to picture - match code with resulting image
+- **Q6**: Stack reasoning - identify transformation sequence from visual
+- **Q7**: Code input - write transformation code to match target
+- **Q8**: Ray-sphere intersection (Levels A, B, C)
 
-## How can I deploy this project?
+## Development
 
-Simply open [Lovable](https://lovable.dev/projects/4be38373-8106-496f-93a3-16fae584a5ea) and click on Share -> Publish.
+The codebase uses TypeScript for type safety and follows React best practices. The deterministic question generation ensures each student receives consistent questions based on their student ID and exam key.
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT
