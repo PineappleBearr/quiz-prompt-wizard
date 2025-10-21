@@ -10,16 +10,16 @@ const TIER_CONFIGS = {
   4: { transforms: 4, angles: [23, -23, 44, -44, 67, -67, 89, -89, 110, -110, 156, -156, 78, -78, 123, -123], distances: [1.0, 2.0, 1.5, 0.5, 2.5, 0.75], yDistances: [0.5, 1.0, 1.5, 2.0, 2.5, 0.75] },
 };
 
-const SHAPES = ["arrow", "wedge", "flag", "boot"];
+const SHAPES = ["arrow", "wedge", "flag", "boot", "tshirt", "lshape"];
 const FRAMES = ["world", "local"];
 
 export function generateQuestion(seed: string, type: string, tier: number, questionIndex: number = 0): Question {
   const rng = new SeededRandom(seed);
   const config = TIER_CONFIGS[tier as keyof typeof TIER_CONFIGS] || TIER_CONFIGS[1];
 
-  // Vary shape based on question index to ensure different shapes across questions
-  const shapeIndex = questionIndex % SHAPES.length;
-  const shape = SHAPES[shapeIndex];
+  // Shuffle shapes to ensure randomization across questions
+  const shuffledShapes = rng.shuffle([...SHAPES]);
+  const shape = shuffledShapes[0];
 
   // Generate variant based on question type
   if (type === "code_picture") {

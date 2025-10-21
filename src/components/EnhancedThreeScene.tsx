@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Transform } from "@/types/question";
+import { ZoomControls } from "./ZoomControls";
 
 interface EnhancedThreeSceneProps {
   transforms: Transform[];
@@ -12,6 +13,7 @@ interface EnhancedThreeSceneProps {
   numInstances?: number;
   showAngles?: boolean;
   interactive?: boolean;
+  showZoomControls?: boolean;
 }
 
 export const EnhancedThreeScene = ({ 
@@ -23,10 +25,12 @@ export const EnhancedThreeScene = ({
   showMultipleInstances = false,
   numInstances = 3,
   showAngles = true,
-  interactive = true
+  interactive = true,
+  showZoomControls = true
 }: EnhancedThreeSceneProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRotating, setIsRotating] = useState(false);
+  const [zoom, setZoom] = useState(7);
   const mouseDown = useRef(false);
   const previousMouse = useRef({ x: 0, y: 0 });
   const cameraRotation = useRef({ theta: Math.PI / 6, phi: Math.PI / 4 });
@@ -41,11 +45,10 @@ export const EnhancedThreeScene = ({
     scene.fog = new THREE.Fog(bgColor, 15, 25);
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    const radius = 7;
     camera.position.set(
-      radius * Math.sin(cameraRotation.current.phi) * Math.cos(cameraRotation.current.theta),
-      radius * Math.cos(cameraRotation.current.phi),
-      radius * Math.sin(cameraRotation.current.phi) * Math.sin(cameraRotation.current.theta)
+      zoom * Math.sin(cameraRotation.current.phi) * Math.cos(cameraRotation.current.theta),
+      zoom * Math.cos(cameraRotation.current.phi),
+      zoom * Math.sin(cameraRotation.current.phi) * Math.sin(cameraRotation.current.theta)
     );
     camera.lookAt(0, 1, 0);
 
@@ -113,9 +116,10 @@ export const EnhancedThreeScene = ({
       return sprite;
     };
 
-    scene.add(createLabel('X', new THREE.Vector3(3.3, 0, 0), 0xff4466));
-    scene.add(createLabel('Y', new THREE.Vector3(0, 3.8, 0), 0x44ff88));
-    scene.add(createLabel('Z', new THREE.Vector3(0, 0, 3.3), 0x4488ff));
+    // Larger, more visible axis labels
+    scene.add(createLabel('X', new THREE.Vector3(3.5, 0, 0), 0xff4466, 1.2));
+    scene.add(createLabel('Y', new THREE.Vector3(0, 4.2, 0), 0x44ff88, 1.2));
+    scene.add(createLabel('Z', new THREE.Vector3(0, 0, 3.5), 0x4488ff, 1.2));
 
     // Unit markers
     for (let i = -2; i <= 3; i++) {
@@ -152,67 +156,99 @@ export const EnhancedThreeScene = ({
       });
     }
 
-    // Enhanced shape geometry - scaled to fit within ±3 unit bounds
+    // Enhanced shape geometry with more variety and less symmetry
     const createShapeGeometry = (): THREE.BufferGeometry => {
-      const scale = 0.6; // Scale factor to keep shapes within bounds
+      const scale = 0.6;
       
       if (shape === "arrow") {
+        // Less symmetric arrow
         const shapeArrow = new THREE.Shape();
-        shapeArrow.moveTo(0.2 * scale, 0);
-        shapeArrow.lineTo(0.5 * scale, 0);
-        shapeArrow.lineTo(0.5 * scale, 1.0 * scale);
-        shapeArrow.lineTo(0.9 * scale, 1.0 * scale);
-        shapeArrow.lineTo(0.35 * scale, 1.6 * scale);
-        shapeArrow.lineTo(-0.2 * scale, 1.0 * scale);
-        shapeArrow.lineTo(0.2 * scale, 1.0 * scale);
-        shapeArrow.lineTo(0.2 * scale, 0);
-        return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+        shapeArrow.moveTo(0.1 * scale, 0);
+        shapeArrow.lineTo(0.6 * scale, 0);
+        shapeArrow.lineTo(0.6 * scale, 1.1 * scale);
+        shapeArrow.lineTo(1.0 * scale, 1.1 * scale);
+        shapeArrow.lineTo(0.35 * scale, 1.7 * scale);
+        shapeArrow.lineTo(-0.1 * scale, 1.1 * scale);
+        shapeArrow.lineTo(0.3 * scale, 1.1 * scale);
+        shapeArrow.lineTo(0.3 * scale, 0);
+        shapeArrow.lineTo(0.1 * scale, 0);
+        return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.2 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "wedge") {
         const shapeWedge = new THREE.Shape();
         shapeWedge.moveTo(0, 0);
-        shapeWedge.lineTo(1.2 * scale, 0);
-        shapeWedge.lineTo(1.2 * scale, 0.3 * scale);
-        shapeWedge.lineTo(0.3 * scale, 1.5 * scale);
-        shapeWedge.lineTo(0, 1.5 * scale);
+        shapeWedge.lineTo(1.3 * scale, 0);
+        shapeWedge.lineTo(1.3 * scale, 0.4 * scale);
+        shapeWedge.lineTo(0.2 * scale, 1.6 * scale);
+        shapeWedge.lineTo(0, 1.6 * scale);
         shapeWedge.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeWedge, { depth: 0.2 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeWedge, { depth: 0.25 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "flag") {
         const shapeFlag = new THREE.Shape();
         shapeFlag.moveTo(0, 0);
-        shapeFlag.lineTo(0.15 * scale, 0);
-        shapeFlag.lineTo(0.15 * scale, 1.8 * scale);
-        shapeFlag.lineTo(1.0 * scale, 1.5 * scale);
-        shapeFlag.lineTo(1.0 * scale, 1.0 * scale);
-        shapeFlag.lineTo(0.15 * scale, 1.2 * scale);
+        shapeFlag.lineTo(0.2 * scale, 0);
+        shapeFlag.lineTo(0.2 * scale, 1.9 * scale);
+        shapeFlag.lineTo(1.1 * scale, 1.6 * scale);
+        shapeFlag.lineTo(1.1 * scale, 1.0 * scale);
+        shapeFlag.lineTo(0.2 * scale, 1.2 * scale);
         shapeFlag.lineTo(0, 1.2 * scale);
         shapeFlag.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeFlag, { depth: 0.1 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeFlag, { depth: 0.12 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       } else if (shape === "boot") {
         const shapeBoot = new THREE.Shape();
         shapeBoot.moveTo(0, 0);
-        shapeBoot.lineTo(1.0 * scale, 0);
-        shapeBoot.lineTo(1.0 * scale, 0.2 * scale);
-        shapeBoot.lineTo(0.3 * scale, 0.2 * scale);
-        shapeBoot.lineTo(0.3 * scale, 0.5 * scale);
-        shapeBoot.lineTo(0.6 * scale, 0.5 * scale);
-        shapeBoot.lineTo(0.6 * scale, 1.5 * scale);
-        shapeBoot.lineTo(0.3 * scale, 1.5 * scale);
-        shapeBoot.lineTo(0.3 * scale, 0.5 * scale);
-        shapeBoot.lineTo(0, 0.5 * scale);
+        shapeBoot.lineTo(1.1 * scale, 0);
+        shapeBoot.lineTo(1.1 * scale, 0.3 * scale);
+        shapeBoot.lineTo(0.4 * scale, 0.3 * scale);
+        shapeBoot.lineTo(0.4 * scale, 0.6 * scale);
+        shapeBoot.lineTo(0.7 * scale, 0.6 * scale);
+        shapeBoot.lineTo(0.7 * scale, 1.6 * scale);
+        shapeBoot.lineTo(0.3 * scale, 1.6 * scale);
+        shapeBoot.lineTo(0.3 * scale, 0.6 * scale);
+        shapeBoot.lineTo(0, 0.6 * scale);
         shapeBoot.lineTo(0, 0);
-        return new THREE.ExtrudeGeometry(shapeBoot, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+        return new THREE.ExtrudeGeometry(shapeBoot, { depth: 0.18 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+      } else if (shape === "tshirt") {
+        // T-shirt shape
+        const shapeTshirt = new THREE.Shape();
+        shapeTshirt.moveTo(0.3 * scale, 0);
+        shapeTshirt.lineTo(0.8 * scale, 0);
+        shapeTshirt.lineTo(0.8 * scale, 0.4 * scale);
+        shapeTshirt.lineTo(1.2 * scale, 0.4 * scale);
+        shapeTshirt.lineTo(1.2 * scale, 0.8 * scale);
+        shapeTshirt.lineTo(0.9 * scale, 0.8 * scale);
+        shapeTshirt.lineTo(0.9 * scale, 1.7 * scale);
+        shapeTshirt.lineTo(0.2 * scale, 1.7 * scale);
+        shapeTshirt.lineTo(0.2 * scale, 0.8 * scale);
+        shapeTshirt.lineTo(-0.1 * scale, 0.8 * scale);
+        shapeTshirt.lineTo(-0.1 * scale, 0.4 * scale);
+        shapeTshirt.lineTo(0.3 * scale, 0.4 * scale);
+        shapeTshirt.lineTo(0.3 * scale, 0);
+        return new THREE.ExtrudeGeometry(shapeTshirt, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+      } else if (shape === "lshape") {
+        // L-shape
+        const shapeLShape = new THREE.Shape();
+        shapeLShape.moveTo(0, 0);
+        shapeLShape.lineTo(1.0 * scale, 0);
+        shapeLShape.lineTo(1.0 * scale, 0.5 * scale);
+        shapeLShape.lineTo(0.4 * scale, 0.5 * scale);
+        shapeLShape.lineTo(0.4 * scale, 1.6 * scale);
+        shapeLShape.lineTo(0, 1.6 * scale);
+        shapeLShape.lineTo(0, 0);
+        return new THREE.ExtrudeGeometry(shapeLShape, { depth: 0.2 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
       }
+      
       // Default to arrow
       const shapeArrow = new THREE.Shape();
-      shapeArrow.moveTo(0.2 * scale, 0);
-      shapeArrow.lineTo(0.5 * scale, 0);
-      shapeArrow.lineTo(0.5 * scale, 1.0 * scale);
-      shapeArrow.lineTo(0.9 * scale, 1.0 * scale);
-      shapeArrow.lineTo(0.35 * scale, 1.6 * scale);
-      shapeArrow.lineTo(-0.2 * scale, 1.0 * scale);
-      shapeArrow.lineTo(0.2 * scale, 1.0 * scale);
-      shapeArrow.lineTo(0.2 * scale, 0);
-      return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.15 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
+      shapeArrow.moveTo(0.1 * scale, 0);
+      shapeArrow.lineTo(0.6 * scale, 0);
+      shapeArrow.lineTo(0.6 * scale, 1.1 * scale);
+      shapeArrow.lineTo(1.0 * scale, 1.1 * scale);
+      shapeArrow.lineTo(0.35 * scale, 1.7 * scale);
+      shapeArrow.lineTo(-0.1 * scale, 1.1 * scale);
+      shapeArrow.lineTo(0.3 * scale, 1.1 * scale);
+      shapeArrow.lineTo(0.3 * scale, 0);
+      shapeArrow.lineTo(0.1 * scale, 0);
+      return new THREE.ExtrudeGeometry(shapeArrow, { depth: 0.2 * scale, bevelEnabled: true, bevelThickness: 0.02 * scale, bevelSize: 0.02 * scale, bevelSegments: 3 });
     };
 
     // Enhanced materials with better lighting response
@@ -369,9 +405,9 @@ export const EnhancedThreeScene = ({
       frameId = requestAnimationFrame(animate);
       
       camera.position.set(
-        radius * Math.sin(cameraRotation.current.phi) * Math.cos(cameraRotation.current.theta),
-        radius * Math.cos(cameraRotation.current.phi),
-        radius * Math.sin(cameraRotation.current.phi) * Math.sin(cameraRotation.current.theta)
+        zoom * Math.sin(cameraRotation.current.phi) * Math.cos(cameraRotation.current.theta),
+        zoom * Math.cos(cameraRotation.current.phi),
+        zoom * Math.sin(cameraRotation.current.phi) * Math.sin(cameraRotation.current.theta)
       );
       camera.lookAt(0, 1, 0);
       
@@ -400,13 +436,20 @@ export const EnhancedThreeScene = ({
         canvasRef.current.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [transforms, shape, width, height, showInitialState, showMultipleInstances, numInstances, showAngles, interactive]);
+  }, [transforms, shape, width, height, showInitialState, showMultipleInstances, numInstances, showAngles, interactive, zoom]);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className={`rounded-lg shadow-lg ${interactive ? 'cursor-grab active:cursor-grabbing' : ''} ${isRotating ? 'cursor-grabbing' : ''}`}
-      style={{ boxShadow: 'var(--shadow-scene)' }}
-    />
+    <div className="relative inline-block">
+      <canvas 
+        ref={canvasRef} 
+        className={`rounded-lg shadow-lg ${interactive ? 'cursor-grab active:cursor-grabbing' : ''} ${isRotating ? 'cursor-grabbing' : ''}`}
+        style={{ boxShadow: 'var(--shadow-scene)' }}
+      />
+      {showZoomControls && interactive && (
+        <div className="absolute bottom-3 right-3">
+          <ZoomControls zoom={zoom} onZoomChange={setZoom} min={4} max={12} />
+        </div>
+      )}
+    </div>
   );
 };
