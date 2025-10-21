@@ -23,12 +23,13 @@ export const StaffConsole = () => {
       const questions: Question[] = [];
       const numQuestions = parseInt(count);
       
-      // Use default values for seed generation
-      const defaultExamKey = "default_exam";
-      const defaultStudentId = "default_student";
+      // Use timestamp to ensure unique seeds for each generation
+      const timestamp = Date.now().toString();
+      const randomComponent = Math.random().toString(36).substring(2, 9);
+      const uniqueKey = `gen_${timestamp}_${randomComponent}`;
       
       for (let i = 0; i < numQuestions; i++) {
-        const seed = await generateSeed(defaultExamKey, defaultStudentId, i, questionType, parseInt(tier));
+        const seed = await generateSeed(uniqueKey, questionType, i, questionType, parseInt(tier));
         const question = generateQuestion(seed, questionType, parseInt(tier), i);
         questions.push(question);
       }
