@@ -141,6 +141,9 @@ export const StudentPlayer = ({
                 <strong>Note:</strong> Use glTranslatef(x, y, z) for translation and glRotatef(angle, x, y, z) for rotation. 
                 The transformations must be in the correct order. The visualization updates in real-time as you type!
               </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Axis Colors:</strong> <span className="text-red-500 font-semibold">Red = X-axis</span>, <span className="text-green-500 font-semibold">Green = Y-axis</span>, <span className="text-blue-500 font-semibold">Blue = Z-axis</span>
+              </p>
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
@@ -235,6 +238,9 @@ export const StudentPlayer = ({
                   <p className="text-sm text-muted-foreground">
                     <strong>Note:</strong> Distances are in units, angles are in degrees. Transformation order matters!
                   </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <strong>Axis Colors:</strong> <span className="text-red-500 font-semibold">Red = X-axis</span>, <span className="text-green-500 font-semibold">Green = Y-axis</span>, <span className="text-blue-500 font-semibold">Blue = Z-axis</span>
+                  </p>
                 </div>
                 <div className="border rounded-lg p-4 bg-muted/20 relative group flex-shrink-0">
                   <EnhancedThreeScene 
@@ -268,6 +274,9 @@ export const StudentPlayer = ({
               <p className="text-sm text-muted-foreground mb-4">
                 <strong>Note:</strong> Distances are in units, angles are in degrees. The asymmetric shape makes orientation visible. 
                 Format: glTranslatef(x, y, z) and glRotatef(angle, axisX, axisY, axisZ)
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Axis Colors:</strong> <span className="text-red-500 font-semibold">Red = X-axis</span>, <span className="text-green-500 font-semibold">Green = Y-axis</span>, <span className="text-blue-500 font-semibold">Blue = Z-axis</span>
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-codeBg font-mono text-sm">
@@ -312,6 +321,9 @@ export const StudentPlayer = ({
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 <strong>Note:</strong> Distances are in units, angles are in degrees. Transformation order matters!
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                <strong>Axis Colors:</strong> <span className="text-red-500 font-semibold">Red = X-axis</span>, <span className="text-green-500 font-semibold">Green = Y-axis</span>, <span className="text-blue-500 font-semibold">Blue = Z-axis</span>
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="border rounded-lg p-4 bg-muted/20 relative group">
