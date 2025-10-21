@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RaySphereVisualizer } from "./RaySphereVisualizer";
 import { 
   RaySphereQuestionData, 
@@ -95,79 +95,144 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Instruction Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Ray-Sphere Intersection - Level {question.level}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Tier {question.level === "A" ? "1-2" : question.level === "B" ? "3" : "4"}
-          </p>
+          <CardTitle className="text-primary">Instruction</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Visualization */}
-          <div className="border rounded-lg p-4 bg-muted/30">
-            <RaySphereVisualizer
-              ray={question.ray}
-              sphere={question.sphere}
-              intersectionT={hitT}
-              showIntersection={true}
-              showTLabels={true}
-              extraSpheres={question.spheres || []}
-            />
+        <CardContent className="space-y-4">
+          {question.level === "A" && (
+            <>
+              <div className="space-y-2 text-sm">
+                <p><strong>Step 1 – Closest distance:</strong> From the picture, compare the closest distance ρ from the ray to the sphere center with the radius r. Pick one that holds.</p>
+                <p><strong>Step 2 – Discriminant:</strong> From your choice, pick the sign of Δ.</p>
+                <p><strong>Step 3 – Consequence & hit:</strong> State what your Δ implies and whether there is a forward hit (t ≥ 0) along +d.</p>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-2"><strong>Reference (no numeric work required):</strong></p>
+                <div className="font-mono text-sm space-y-1">
+                  <p>p(t) = o + t d</p>
+                  <p>ρ = ||(c - o) - ((c - o) · d) d||</p>
+                  <p>ρ &gt; r ⇒ Δ &lt; 0; ρ = r ⇒ Δ = 0; ρ &lt; r ⇒ Δ &gt; 0</p>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Hint: judge visually (closest distance vs radius), then complete Δ and Hit.</p>
+              </div>
+            </>
+          )}
+
+          <div className="bg-muted/20 p-4 rounded-lg">
+            <p className="text-sm font-semibold mb-2">Parameters</p>
+            <div className="font-mono text-xs space-y-1">
+              <p><strong>o:</strong> [{question.ray.origin.map(v => v.toFixed(2)).join(", ")}]</p>
+              <p><strong>d</strong> (unit): [{question.ray.direction.map(v => v.toFixed(2)).join(", ")}]</p>
+              <p><strong>c:</strong> [{question.sphere.center.map(v => v.toFixed(2)).join(", ")}]</p>
+              <p><strong>r:</strong> {question.sphere.radius.toFixed(2)}</p>
+            </div>
           </div>
 
-          {/* Question Parameters */}
-          <div className="grid grid-cols-2 gap-4 p-4 bg-muted/20 rounded-lg text-sm font-mono">
-            <div>
-              <strong>Ray Origin:</strong> [{question.ray.origin.map(v => v.toFixed(2)).join(", ")}]
-            </div>
-            <div>
-              <strong>Ray Direction:</strong> [{question.ray.direction.map(v => v.toFixed(2)).join(", ")}]
-            </div>
-            <div>
-              <strong>Sphere Center:</strong> [{question.sphere.center.map(v => v.toFixed(2)).join(", ")}]
-            </div>
-            <div>
-              <strong>Sphere Radius:</strong> {question.sphere.radius.toFixed(2)}
-            </div>
+          <div className="bg-muted/20 p-4 rounded-lg">
+            <p className="text-sm font-semibold mb-2">Glossary (quick meanings)</p>
+            <ul className="text-xs space-y-1 list-disc list-inside">
+              <li><strong>o:</strong> ray origin (start point)</li>
+              <li><strong>d:</strong> ray direction (unit vector)</li>
+              <li><strong>c:</strong> sphere center and radius</li>
+              <li><strong>p(t)=o+td:</strong> point on the ray after distance t along +d</li>
+              <li><strong>ρ:</strong> closest distance from c to the ray line</li>
+              <li><strong>Δ:</strong> discriminant; its sign decides miss/tangent/two hits</li>
+            </ul>
           </div>
+        </CardContent>
+      </Card>
 
+      {/* Visualization Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-primary">Visualization</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RaySphereVisualizer
+            ray={question.ray}
+            sphere={question.sphere}
+            intersectionT={hitT}
+            showIntersection={true}
+            showTLabels={true}
+            extraSpheres={question.spheres || []}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Answer Card */}
+      <Card>
+        <CardContent className="pt-6 space-y-6">
           {/* Level A: Basic Analysis */}
           {question.level === "A" && (
             <div className="space-y-4">
-              <div>
-                <Label>Discriminant Sign (Δ)</Label>
-                <RadioGroup value={deltaSign} onValueChange={(v) => setDeltaSign(v as DeltaSign)}>
-                  {DELTA_SIGN_OPTIONS.map((opt) => (
-                    <div key={opt.value} className="flex items-center space-x-2">
-                      <RadioGroupItem value={opt.value} id={`delta-${opt.value}`} />
-                      <Label htmlFor={`delta-${opt.value}`}>{opt.label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+              <div className="space-y-2">
+                <Label>Step 1. ρ vs r</Label>
+                <Select value={hit ? "ρ < r" : "ρ > r"} onValueChange={(v) => setHit(v === "ρ < r")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ρ < r">ρ &lt; r</SelectItem>
+                    <SelectItem value="ρ = r">ρ = r</SelectItem>
+                    <SelectItem value="ρ > r">ρ &gt; r</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <Label>Does the ray hit the sphere? (t ≥ 0)</Label>
-                <RadioGroup value={hit ? "yes" : "no"} onValueChange={(v) => setHit(v === "yes")}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="hit-yes" />
-                    <Label htmlFor="hit-yes">Yes</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="hit-no" />
-                    <Label htmlFor="hit-no">No</Label>
-                  </div>
-                </RadioGroup>
+              <div className="space-y-2">
+                <Label>Step 2. Choose the sign of Δ</Label>
+                <Select value={deltaSign === "POS" ? "Δ > 0" : deltaSign === "ZERO" ? "Δ = 0" : "Δ < 0"} 
+                        onValueChange={(v) => setDeltaSign(v === "Δ > 0" ? "POS" : v === "Δ = 0" ? "ZERO" : "NEG")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Δ > 0">Δ &gt; 0</SelectItem>
+                    <SelectItem value="Δ = 0">Δ = 0</SelectItem>
+                    <SelectItem value="Δ < 0">Δ &lt; 0</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <Label>Explanation (Optional)</Label>
-                <Textarea
+              <div className="space-y-2">
+                <Label>Step 3a. What does your Δ imply?</Label>
+                <Select defaultValue="two real roots">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no real roots">no real roots</SelectItem>
+                    <SelectItem value="one real root (tangent)">one real root (tangent)</SelectItem>
+                    <SelectItem value="two real roots">two real roots</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Step 3b. Forward hit in +d (t ≥ 0)?</Label>
+                <Select value={hit ? "Yes — visible forward hit" : "No — miss or behind ray"} 
+                        onValueChange={(v) => setHit(v === "Yes — visible forward hit")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes — visible forward hit">Yes — visible forward hit</SelectItem>
+                    <SelectItem value="No — miss or behind ray">No — miss or behind ray</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Optional: one-line explanation</Label>
+                <Input
                   value={explanation}
                   onChange={(e) => setExplanation(e.target.value)}
-                  placeholder="Explain your reasoning..."
-                  rows={3}
+                  placeholder="e.g. ρ<r ⇒ Δ>0 (two roots); choose smallest t≥0 for the visible hit."
+                  className="text-sm"
                 />
               </div>
             </div>
@@ -176,19 +241,23 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
           {/* Level B: Tangency Hunter */}
           {question.level === "B" && (
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Branch Code</Label>
-                <RadioGroup value={branch} onValueChange={(v) => setBranch(v as BranchCode)}>
-                  {BRANCH_OPTIONS.map((opt) => (
-                    <div key={opt.value} className="flex items-center space-x-2">
-                      <RadioGroupItem value={opt.value} id={`branch-${opt.value}`} />
-                      <Label htmlFor={`branch-${opt.value}`}>{opt.label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <Select value={branch} onValueChange={(v) => setBranch(v as BranchCode)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DELTA_LT_0">No real roots (Δ &lt; 0)</SelectItem>
+                    <SelectItem value="TANGENT">Tangent (Δ = 0)</SelectItem>
+                    <SelectItem value="TWO_ROOTS">Two roots (Δ &gt; 0)</SelectItem>
+                    <SelectItem value="NEGATIVE_T">Negative t (behind ray)</SelectItem>
+                    <SelectItem value="OK">Valid hit found</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>x to Check</Label>
                 <Input
                   type="number"
@@ -199,7 +268,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>x* Threshold (leave empty if no hit)</Label>
                 <Input
                   type="number"
@@ -210,7 +279,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>Explanation</Label>
                 <Textarea
                   value={explanation}
@@ -225,7 +294,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
           {/* Level C: Multi-sphere */}
           {question.level === "C" && (
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label>Hit t Value</Label>
                 <Input
                   type="number"
@@ -236,7 +305,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>First Sphere Index (0-based)</Label>
                 <Input
                   type="number"
@@ -246,7 +315,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>Tie-break Justification (if applicable)</Label>
                 <Textarea
                   value={tieJustification}
@@ -259,7 +328,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
           )}
 
           <Button onClick={handleSubmit} className="w-full">
-            Submit Answer
+            Submit
           </Button>
         </CardContent>
       </Card>
