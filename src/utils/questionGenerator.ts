@@ -376,8 +376,8 @@ function generateQ7Question(seed: string, rng: SeededRandom, config: any, tier: 
 }
 
 function generateQ8RaySphereQuestion(seed: string, tier: number, shape: string): Question {
-  // Map tier to ray-sphere levels: 1-2 -> A, 3 -> B, 4 -> C
-  const level: "A" | "B" | "C" = tier <= 2 ? "A" : tier === 3 ? "B" : "C";
+  // Map tier to ray-sphere levels: 1 -> A, 2 -> B, 3 -> C
+  const level: "A" | "B" | "C" = tier === 1 ? "A" : tier === 2 ? "B" : "C";
   const raySphereData = generateRaySphereQuestion(level);
 
   return {
