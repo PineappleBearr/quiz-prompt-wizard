@@ -112,11 +112,21 @@ export const StaffConsole = () => {
                 <SelectTrigger id="tier">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Tier 1 (Single-move)</SelectItem>
-                  <SelectItem value="2">Tier 2 (Two-step)</SelectItem>
-                  <SelectItem value="3">Tier 3 (Pivoted)</SelectItem>
-                  <SelectItem value="4">Tier 4 (Sequence)</SelectItem>
+                <SelectContent className="bg-background z-50">
+                  {questionType === "ray_sphere" ? (
+                    <>
+                      <SelectItem value="1">Level A (Apply)</SelectItem>
+                      <SelectItem value="2">Level B (Tangency Hunter)</SelectItem>
+                      <SelectItem value="3">Level C (Evaluate)</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="1">Tier 1 (Single-move)</SelectItem>
+                      <SelectItem value="2">Tier 2 (Two-step)</SelectItem>
+                      <SelectItem value="3">Tier 3 (Pivoted)</SelectItem>
+                      <SelectItem value="4">Tier 4 (Sequence)</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
