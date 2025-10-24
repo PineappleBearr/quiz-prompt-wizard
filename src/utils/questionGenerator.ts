@@ -174,32 +174,15 @@ function generateTransformSequence(rng: SeededRandom, config: any, tier: number)
 
   for (let i = 0; i < numTransforms; i++) {
     if (tier === 1) {
-      // Tier 1: Simple single axis operations, 2D only (z-axis rotations)
-      if (rng.next() < 0.5) {
-        // 2D rotation (z-axis only)
-        const angle: number = rng.choice(config.angles);
-        sequence.push({ type: "rotate", params: [angle, 0, 0, 1] });
-      } else {
-        // 2D translation (x or y axis only)
-        const axis: number = rng.choice([0, 1] as const);
-        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
-        const params = axis === 0 ? [dist, 0, 0] as number[] : [0, dist, 0] as number[];
-        sequence.push({ type: "translate", params });
-      }
+      // Tier 1: Translations only - 2D (x or y axis only)
+      const axis: number = rng.choice([0, 1] as const);
+      const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
+      const params = axis === 0 ? [dist, 0, 0] as number[] : [0, dist, 0] as number[];
+      sequence.push({ type: "translate", params });
     } else if (tier === 2) {
-      // Tier 2: Mix of operations, 2D only (z-axis rotations)
-      const transformType = rng.next() < 0.5 ? "rotate" : "translate";
-      if (transformType === "rotate") {
-        // 2D rotation (z-axis only)
-        const angle: number = rng.choice(config.angles);
-        sequence.push({ type: "rotate", params: [angle, 0, 0, 1] });
-      } else {
-        // 2D translation (x or y axis)
-        const axis: number = rng.choice([0, 1] as const);
-        const dist: number = axis === 1 ? rng.choice(config.yDistances) : rng.choice(config.distances);
-        const params = axis === 0 ? [dist, 0, 0] as number[] : [0, dist, 0] as number[];
-        sequence.push({ type: "translate", params });
-      }
+      // Tier 2: Rotations only - 2D (z-axis only)
+      const angle: number = rng.choice(config.angles);
+      sequence.push({ type: "rotate", params: [angle, 0, 0, 1] });
     } else {
       // Tier 3-4: Complex sequences with 3D rotations and translations
       // Force alternating pattern for complexity
