@@ -109,8 +109,8 @@ export const StaffConsole = () => {
                     </>
                   ) : (
                     <>
-                      <SelectItem value="1">Tier 1 (Single-move)</SelectItem>
-                      <SelectItem value="2">Tier 2 (Two-step)</SelectItem>
+                      <SelectItem value="1">Tier 1 (Translations)</SelectItem>
+                      <SelectItem value="2">Tier 2 (Rotation)</SelectItem>
                       <SelectItem value="3">Tier 3 (Pivoted)</SelectItem>
                       <SelectItem value="4">Tier 4 (Sequence)</SelectItem>
                     </>
