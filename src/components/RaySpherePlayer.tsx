@@ -17,7 +17,8 @@ import { gradeRaySphere } from "@/utils/raySphereGrading";
 import { 
   raySphereIntersection, 
   chooseHitAndReason,
-  EPS
+  EPS,
+  perturbDirectionEuler
 } from "@/utils/raySphere";
 import { toast } from "sonner";
 
@@ -92,7 +93,15 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
   };
 
   // Calculate reference answer for visualization
-  const roots = raySphereIntersection(question.ray, question.sphere);
+  // For Level B, apply yaw/pitch perturbation to the ray direction
+  const displayRay = question.level === "B" 
+    ? {
+        origin: question.ray.origin,
+        direction: perturbDirectionEuler(question.ray.direction, yaw[0], pitch[0])
+      }
+    : question.ray;
+
+  const roots = raySphereIntersection(displayRay, question.sphere);
   const { hitT } = chooseHitAndReason(roots, {
     tWindow: question.tWindow,
     epsilon: Math.max(question.tolerance, EPS),
@@ -228,7 +237,7 @@ export const RaySpherePlayer = ({ question, onSubmit }: RaySpherePlayerProps) =>
           </CardHeader>
           <CardContent>
             <RaySphereVisualizer
-              ray={question.ray}
+              ray={displayRay}
               sphere={question.sphere}
               intersectionT={hitT}
               showIntersection={true}
