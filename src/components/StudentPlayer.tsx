@@ -119,6 +119,8 @@ export const StudentPlayer = ({
                 {question.type === "code_picture" ? "Code to Picture" : 
                  question.type === "stack_reasoning" ? "Stack Reasoning" : 
                  question.type === "code_input" ? "Code Input Challenge" :
+                 question.type === "transform_mcq" && question.tier === 1 ? "Transformation" :
+                 question.type === "transform_mcq" && question.tier === 2 ? "Rotation" :
                  "Transformation Sequence"}
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
