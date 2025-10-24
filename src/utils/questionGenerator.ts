@@ -44,20 +44,27 @@ function generateQ4Question(seed: string, rng: SeededRandom, config: any, tier: 
   const seenOptions = new Set([JSON.stringify(sequence)]);
   
   let attempts = 0;
-  while (options.length < 4 && attempts < 20) {
-    const distractor = generateDistractor(rng, sequence, tier);
+  let strategyIndex = 0;
+  while (options.length < 4 && attempts < 100) {
+    const distractor = generateDistractor(rng, sequence, tier, strategyIndex % 4);
     const distractorKey = JSON.stringify(distractor);
     
     if (!seenOptions.has(distractorKey)) {
       options.push(distractor);
       seenOptions.add(distractorKey);
+      strategyIndex++;
     }
     attempts++;
   }
   
+  // Force generation if still not enough options
   while (options.length < 4) {
-    const extraDistractor = generateDistractor(rng, sequence, tier);
-    options.push(extraDistractor);
+    const distractor = generateDistractor(rng, sequence, tier, options.length);
+    const distractorKey = JSON.stringify(distractor);
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
   }
 
   const shuffledOptions = rng.shuffle(options);
@@ -89,19 +96,26 @@ function generateQ5Question(seed: string, rng: SeededRandom, config: any, tier: 
   const seenOptions = new Set([JSON.stringify(sequence)]);
   
   let attempts = 0;
-  while (options.length < 4 && attempts < 20) {
-    const distractor = generateDistractor(rng, sequence, tier);
+  let strategyIndex = 0;
+  while (options.length < 4 && attempts < 100) {
+    const distractor = generateDistractor(rng, sequence, tier, strategyIndex % 4);
     const distractorKey = JSON.stringify(distractor);
     
     if (!seenOptions.has(distractorKey)) {
       options.push(distractor);
       seenOptions.add(distractorKey);
+      strategyIndex++;
     }
     attempts++;
   }
   
   while (options.length < 4) {
-    options.push(generateDistractor(rng, sequence, tier));
+    const distractor = generateDistractor(rng, sequence, tier, options.length);
+    const distractorKey = JSON.stringify(distractor);
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
   }
 
   const shuffledOptions = rng.shuffle(options);
@@ -135,19 +149,26 @@ function generateQ6Question(seed: string, rng: SeededRandom, config: any, tier: 
   const seenOptions = new Set([JSON.stringify(sequence)]);
   
   let attempts = 0;
-  while (options.length < 4 && attempts < 20) {
-    const distractor = generateDistractor(rng, sequence, tier);
+  let strategyIndex = 0;
+  while (options.length < 4 && attempts < 100) {
+    const distractor = generateDistractor(rng, sequence, tier, strategyIndex % 4);
     const distractorKey = JSON.stringify(distractor);
     
     if (!seenOptions.has(distractorKey)) {
       options.push(distractor);
       seenOptions.add(distractorKey);
+      strategyIndex++;
     }
     attempts++;
   }
   
   while (options.length < 4) {
-    options.push(generateDistractor(rng, sequence, tier));
+    const distractor = generateDistractor(rng, sequence, tier, options.length);
+    const distractorKey = JSON.stringify(distractor);
+    if (!seenOptions.has(distractorKey)) {
+      options.push(distractor);
+      seenOptions.add(distractorKey);
+    }
   }
 
   const shuffledOptions = rng.shuffle(options);
@@ -274,28 +295,37 @@ function generateRepeatedDrawSequence(rng: SeededRandom, config: any, tier: numb
   return sequence;
 }
 
-function generateDistractor(rng: SeededRandom, correct: Transform[], tier: number): Transform[] {
+function generateDistractor(rng: SeededRandom, correct: Transform[], tier: number, forcedStrategy?: number): Transform[] {
   // Create plausible but wrong alternative
   const distractor: Transform[] = JSON.parse(JSON.stringify(correct));
   
   // Strategy: swap order, flip angle/direction, change axis, or modify magnitude
-  const strategy = rng.nextInt(0, 3);
+  const strategy = forcedStrategy !== undefined ? forcedStrategy : rng.nextInt(0, 4);
+  const config = TIER_CONFIGS[tier as keyof typeof TIER_CONFIGS] || TIER_CONFIGS[1];
   
   if (strategy === 0 && distractor.length > 1) {
     // Swap order of two transforms
     const i = rng.nextInt(0, distractor.length - 2);
     [distractor[i], distractor[i + 1]] = [distractor[i + 1], distractor[i]];
   } else if (strategy === 1) {
-    // Flip angle or direction
+    // Flip angle or direction with different magnitude
     const i = rng.nextInt(0, distractor.length - 1);
     if (distractor[i].type === "rotate") {
       distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
-      distractor[i].params[0] = -distractor[i].params[0];
+      // Use a different angle from the config
+      const currentAngle = Math.abs(distractor[i].params[0]);
+      const availableAngles = config.angles.filter(a => Math.abs(a) !== currentAngle);
+      const newAngle = availableAngles.length > 0 ? rng.choice(availableAngles) : -distractor[i].params[0];
+      distractor[i].params[0] = newAngle;
     } else {
       distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
       const nonZeroIdx = distractor[i].params.findIndex(p => p !== 0);
       if (nonZeroIdx >= 0) {
-        distractor[i].params[nonZeroIdx] = -distractor[i].params[nonZeroIdx];
+        const currentDist = Math.abs(distractor[i].params[nonZeroIdx]);
+        const availableDists = (nonZeroIdx === 1 ? config.yDistances : config.distances).filter(d => d !== currentDist);
+        const newDist = availableDists.length > 0 ? rng.choice(availableDists) : -distractor[i].params[nonZeroIdx];
+        const sign = rng.next() < 0.5 ? 1 : -1;
+        distractor[i].params[nonZeroIdx] = sign * newDist;
       }
     }
   } else if (strategy === 2) {
@@ -308,31 +338,45 @@ function generateDistractor(rng: SeededRandom, correct: Transform[], tier: numbe
       // Choose a different axis
       const possibleAxes = [0, 1, 2].filter(a => a !== currentAxis);
       const newAxis: number = rng.choice(possibleAxes as any);
+      // Also change the angle value
+      const availableAngles = config.angles.filter(a => Math.abs(a) !== Math.abs(oldAngle));
+      const newAngle = availableAngles.length > 0 ? rng.choice(availableAngles) : oldAngle;
       distractor[i] = {
         type: "rotate",
-        params: newAxis === 0 ? [oldAngle, 1, 0, 0] : newAxis === 1 ? [oldAngle, 0, 1, 0] : [oldAngle, 0, 0, 1]
+        params: newAxis === 0 ? [newAngle, 1, 0, 0] : newAxis === 1 ? [newAngle, 0, 1, 0] : [newAngle, 0, 0, 1]
       };
     } else {
-      const oldDist = Math.abs(distractor[i].params.find(p => p !== 0) || 1.0);
+      const currentDist = Math.abs(distractor[i].params.find(p => p !== 0) || 1.0);
       const currentAxis = distractor[i].params[0] !== 0 ? 0 : distractor[i].params[1] !== 0 ? 1 : 2;
       const possibleAxes = [0, 1, 2].filter(a => a !== currentAxis);
       const newAxis: number = rng.choice(possibleAxes as any);
+      // Use a different distance value
+      const availableDists = (newAxis === 1 ? config.yDistances : config.distances).filter(d => d !== currentDist);
+      const newDist = availableDists.length > 0 ? rng.choice(availableDists) : currentDist;
       distractor[i] = {
         type: "translate",
-        params: newAxis === 0 ? [oldDist, 0, 0] : newAxis === 1 ? [0, oldDist, 0] : [0, 0, oldDist]
+        params: newAxis === 0 ? [newDist, 0, 0] : newAxis === 1 ? [0, newDist, 0] : [0, 0, newDist]
       };
     }
   } else {
-    // Change magnitude of translation
+    // Change magnitude with random sign
     const i = rng.nextInt(0, distractor.length - 1);
     if (distractor[i].type === "translate") {
       distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
       const nonZeroIdx = distractor[i].params.findIndex(p => p !== 0);
       if (nonZeroIdx >= 0) {
-        const sign = distractor[i].params[nonZeroIdx] > 0 ? 1 : -1;
-        const newDist = rng.choice([1.0, 1.5, 2.0, 2.5].filter(d => d !== Math.abs(distractor[i].params[nonZeroIdx])));
+        const currentDist = Math.abs(distractor[i].params[nonZeroIdx]);
+        const availableDists = (nonZeroIdx === 1 ? config.yDistances : config.distances).filter(d => d !== currentDist);
+        const newDist = availableDists.length > 0 ? rng.choice(availableDists) : currentDist * 1.5;
+        const sign = rng.next() < 0.5 ? 1 : -1;
         distractor[i].params[nonZeroIdx] = sign * newDist;
       }
+    } else if (distractor[i].type === "rotate") {
+      distractor[i] = { ...distractor[i], params: [...distractor[i].params] };
+      const currentAngle = Math.abs(distractor[i].params[0]);
+      const availableAngles = config.angles.filter(a => Math.abs(a) !== currentAngle);
+      const newAngle = availableAngles.length > 0 ? rng.choice(availableAngles) : -distractor[i].params[0];
+      distractor[i].params[0] = newAngle;
     }
   }
   
